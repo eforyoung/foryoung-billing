@@ -1,6 +1,7 @@
 import { Card, Badge } from '@/lib/ui'
 import { fmtXaf, monthName } from '@/lib/utils'
 import { getInternetBills } from './actions'
+import { InternetBillRowActions } from './InternetBillRowActions'
 
 export async function InternetBillList() {
   const bills = await getInternetBills()
@@ -13,6 +14,7 @@ export async function InternetBillList() {
             <th className="pb-2">Period</th>
             <th className="pb-2">Amount</th>
             <th className="pb-2">Status</th>
+            <th className="pb-2">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -26,6 +28,11 @@ export async function InternetBillList() {
               <td className="py-2 text-white/70">{fmtXaf(Number(b.amount))}</td>
               <td className="py-2">
                 <Badge color={b.isPaid ? 'green' : 'amber'}>{b.isPaid ? 'Paid' : 'Unpaid'}</Badge>
+              </td>
+              <td className="py-2">
+                {!b.isPaid && (
+                  <InternetBillRowActions bill={{ id: b.id, month: b.month, year: b.year, monthsCount: b.monthsCount }} />
+                )}
               </td>
             </tr>
           ))}

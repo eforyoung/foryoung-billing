@@ -102,3 +102,33 @@ export async function generateInternetBill(input: GenerateInternetBillInput): Pr
     return { success: false, error: 'Failed to generate bill.' }
   }
 }
+
+export async function updateInternetBill(
+  billId: string,
+  input: { month: number; year: number; monthsCount: number },
+): Promise<ActionResult> {
+  const session = await auth()
+  if (!session?.user) return { success: false, error: 'Not authenticated' }
+
+  const bill = await prisma.bill.findUnique({ where: { id: billId } })
+  if (!bill) return { success: false, error: 'Bill not found' }
+  if (bill.isPaid) return { success: false, error: 'Cannot edit a paid bill.' }
+
+  const amount = computeInternetTotal(input.monthsCount)
+
+  try {
+    await prisma.bill.update({
+      where: { id: billId },
+      data: { month: input.month, year: input.year, monthsCount: input.monthsCount, amount },
+    })
+  } catch (error: any) {
+    if (error?.code === 'P2002') {
+      return { success: false, error: 'A bill already exists for this client and period.' }
+    }
+    console.error('updateInternetBill failed:', error)
+    return { success: false, error: 'Failed to update bill.' }
+  }
+
+  revalidatePath('/dashboard/internet-bills')
+  return { success: true, data: undefined }
+}

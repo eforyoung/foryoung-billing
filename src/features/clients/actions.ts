@@ -8,6 +8,9 @@ import type { ActionResult } from '@/lib/types'
 import type { ClientFormInput, ClientWithServices } from './types'
 
 export async function getClients(): Promise<ClientWithServices[]> {
+  const session = await auth()
+  if (!session?.user) return []
+
   const clients = await prisma.client.findMany({
     include: { services: true },
     orderBy: { name: 'asc' },
@@ -19,6 +22,9 @@ export async function getClients(): Promise<ClientWithServices[]> {
 }
 
 export async function getClientsForDropdown(serviceType?: ServiceType) {
+  const session = await auth()
+  if (!session?.user) return []
+
   const clients = await prisma.client.findMany({
     where: {
       isActive: true,
@@ -44,19 +50,28 @@ export async function saveClient(input: ClientFormInput): Promise<ActionResult<{
     notes: input.notes?.trim() || null,
   }
 
-  const client = input.id
-    ? await prisma.client.update({ where: { id: input.id }, data })
-    : await prisma.client.create({ data })
+  try {
+    const client = await prisma.$transaction(async (tx) => {
+      const client = input.id
+        ? await tx.client.update({ where: { id: input.id }, data })
+        : await tx.client.create({ data })
 
-  await prisma.clientService.deleteMany({ where: { clientId: client.id } })
-  if (input.services.length > 0) {
-    await prisma.clientService.createMany({
-      data: input.services.map(s => ({ clientId: client.id, type: s.type, rate: s.rate ?? null })),
+      await tx.clientService.deleteMany({ where: { clientId: client.id } })
+      if (input.services.length > 0) {
+        await tx.clientService.createMany({
+          data: input.services.map(s => ({ clientId: client.id, type: s.type, rate: s.rate ?? null })),
+        })
+      }
+
+      return client
     })
-  }
 
-  revalidatePath('/dashboard/clients')
-  return { success: true, data: { id: client.id } }
+    revalidatePath('/dashboard/clients')
+    return { success: true, data: { id: client.id } }
+  } catch (error) {
+    console.error('saveClient failed:', error)
+    return { success: false, error: 'Failed to save client.' }
+  }
 }
 
 export async function toggleClientActive(id: string): Promise<ActionResult> {

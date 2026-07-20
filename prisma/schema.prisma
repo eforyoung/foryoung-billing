@@ -63,6 +63,7 @@ model Bill {
   amount      Decimal
   isPaid      Boolean       @default(false)
   paidDate    DateTime?
+  dueDate     DateTime?
   createdAt   DateTime      @default(now())
   payment     Payment?
   reading     WaterReading?

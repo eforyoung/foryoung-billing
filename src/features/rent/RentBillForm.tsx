@@ -15,6 +15,11 @@ export function RentBillForm() {
   const [year, setYear] = useState(new Date().getFullYear())
   const [amount, setAmount] = useState(0)
   const [monthsCount, setMonthsCount] = useState(1)
+  const [dueDate, setDueDate] = useState(() => {
+    const d = new Date()
+    d.setDate(d.getDate() + 30)
+    return d.toISOString().slice(0, 10)
+  })
   const [message, setMessage] = useState('')
 
   useEffect(() => {
@@ -34,7 +39,7 @@ export function RentBillForm() {
 
   async function handleGenerate() {
     setMessage('')
-    const result = await generateRentBill({ clientId, month, year, amount, monthsCount })
+    const result = await generateRentBill({ clientId, month, year, amount, monthsCount, dueDate })
     setMessage(result.success ? 'Bill generated.' : result.error)
   }
 
@@ -64,6 +69,7 @@ export function RentBillForm() {
         <div className="flex gap-3">
           <Input label="Amount per month" type="number" value={amount} onChange={e => setAmount(Number(e.target.value))} />
           <Input label="Number of months" type="number" min={1} value={monthsCount} onChange={e => setMonthsCount(Number(e.target.value))} />
+          <Input label="Due date" type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} />
         </div>
         <p className="text-sm text-white/70">
           Total: <span className="font-semibold text-white">{fmtXaf(computeRentTotal(amount, monthsCount))}</span> (

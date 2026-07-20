@@ -17,6 +17,11 @@ export function InternetBillForm() {
   const [arrears, setArrears] = useState<ArrearsSummary | null>(null)
   const [consolidate, setConsolidate] = useState(false)
   const [manualMonths, setManualMonths] = useState(1)
+  const [dueDate, setDueDate] = useState(() => {
+    const d = new Date()
+    d.setDate(d.getDate() + 30)
+    return d.toISOString().slice(0, 10)
+  })
   const [message, setMessage] = useState('')
 
   useEffect(() => {
@@ -39,7 +44,7 @@ export function InternetBillForm() {
 
   async function handleGenerate() {
     setMessage('')
-    const result = await generateInternetBill({ clientId, month, year, monthsCount, consolidate })
+    const result = await generateInternetBill({ clientId, month, year, monthsCount, consolidate, dueDate })
     setMessage(result.success ? 'Bill generated.' : result.error)
   }
 
@@ -73,6 +78,7 @@ export function InternetBillForm() {
             disabled={consolidate && !!arrears}
             onChange={e => setManualMonths(Number(e.target.value))}
           />
+          <Input label="Due date" type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} />
         </div>
 
         {arrears && (

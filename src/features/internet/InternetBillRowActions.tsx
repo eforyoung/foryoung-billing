@@ -8,7 +8,7 @@ import { computeInternetTotal } from '@/features/billing/calculations'
 import { fmtXaf } from '@/lib/utils'
 
 interface InternetBillRowActionsProps {
-  bill: { id: string; month: number; year: number; monthsCount: number }
+  bill: { id: string; month: number; year: number; monthsCount: number; dueDate: string | null }
 }
 
 export function InternetBillRowActions({ bill }: InternetBillRowActionsProps) {
@@ -17,13 +17,14 @@ export function InternetBillRowActions({ bill }: InternetBillRowActionsProps) {
   const [month, setMonth] = useState(bill.month)
   const [year, setYear] = useState(bill.year)
   const [monthsCount, setMonthsCount] = useState(bill.monthsCount)
+  const [dueDate, setDueDate] = useState(bill.dueDate ?? '')
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
 
   async function handleSave() {
     setSaving(true)
     setError('')
-    const result = await updateInternetBill(bill.id, { month, year, monthsCount })
+    const result = await updateInternetBill(bill.id, { month, year, monthsCount, dueDate })
     setSaving(false)
     if (!result.success) {
       setError(result.error)
@@ -52,6 +53,7 @@ export function InternetBillRowActions({ bill }: InternetBillRowActionsProps) {
             value={monthsCount}
             onChange={e => setMonthsCount(Number(e.target.value))}
           />
+          <Input label="Due date" type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} />
           <p className="text-sm text-white/70">
             New total: <span className="font-semibold text-white">{fmtXaf(computeInternetTotal(monthsCount))}</span>
           </p>

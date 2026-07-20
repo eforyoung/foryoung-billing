@@ -27,6 +27,7 @@ interface GenerateRentBillInput {
   year: number
   amount: number
   monthsCount: number
+  dueDate?: string
 }
 
 export async function generateRentBill(input: GenerateRentBillInput): Promise<ActionResult<{ id: string }>> {
@@ -56,6 +57,7 @@ export async function generateRentBill(input: GenerateRentBillInput): Promise<Ac
       year: input.year,
       amount,
       monthsCount,
+      dueDate: input.dueDate ? new Date(input.dueDate) : null,
     },
   })
 
@@ -75,7 +77,7 @@ export async function getClientRentRate(clientId: string): Promise<number | null
 
 export async function updateRentBill(
   billId: string,
-  input: { month: number; year: number; amount: number; monthsCount: number },
+  input: { month: number; year: number; amount: number; monthsCount: number; dueDate?: string },
 ): Promise<ActionResult> {
   const session = await auth()
   if (!session?.user) return { success: false, error: 'Not authenticated' }
@@ -90,7 +92,13 @@ export async function updateRentBill(
   try {
     await prisma.bill.update({
       where: { id: billId },
-      data: { month: input.month, year: input.year, amount, monthsCount },
+      data: {
+        month: input.month,
+        year: input.year,
+        amount,
+        monthsCount,
+        dueDate: input.dueDate ? new Date(input.dueDate) : null,
+      },
     })
   } catch (error: any) {
     if (error?.code === 'P2002') {

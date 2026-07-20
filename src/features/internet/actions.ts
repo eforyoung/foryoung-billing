@@ -42,6 +42,7 @@ interface GenerateInternetBillInput {
   year: number
   monthsCount: number
   consolidate?: boolean
+  dueDate?: string
 }
 
 export async function generateInternetBill(input: GenerateInternetBillInput): Promise<ActionResult<{ id: string }>> {
@@ -84,6 +85,7 @@ export async function generateInternetBill(input: GenerateInternetBillInput): Pr
           year: input.year,
           monthsCount,
           amount,
+          dueDate: input.dueDate ? new Date(input.dueDate) : null,
         },
       })
 
@@ -105,7 +107,7 @@ export async function generateInternetBill(input: GenerateInternetBillInput): Pr
 
 export async function updateInternetBill(
   billId: string,
-  input: { month: number; year: number; monthsCount: number },
+  input: { month: number; year: number; monthsCount: number; dueDate?: string },
 ): Promise<ActionResult> {
   const session = await auth()
   if (!session?.user) return { success: false, error: 'Not authenticated' }
@@ -120,7 +122,13 @@ export async function updateInternetBill(
   try {
     await prisma.bill.update({
       where: { id: billId },
-      data: { month: input.month, year: input.year, monthsCount, amount },
+      data: {
+        month: input.month,
+        year: input.year,
+        monthsCount,
+        amount,
+        dueDate: input.dueDate ? new Date(input.dueDate) : null,
+      },
     })
   } catch (error: any) {
     if (error?.code === 'P2002') {

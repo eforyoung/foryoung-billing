@@ -7,13 +7,17 @@ import { generateRentBill } from './actions'
 
 export function RentBillForm() {
   const [clients, setClients] = useState<{ id: string; name: string }[]>([])
+  const [clientsLoading, setClientsLoading] = useState(true)
   const [clientId, setClientId] = useState('')
   const [month, setMonth] = useState(new Date().getMonth() + 1)
   const [year, setYear] = useState(new Date().getFullYear())
   const [message, setMessage] = useState('')
 
   useEffect(() => {
-    getClientsForDropdown('RENT').then(setClients)
+    getClientsForDropdown('RENT').then(result => {
+      setClients(result)
+      setClientsLoading(false)
+    })
   }, [])
 
   async function handleGenerate() {
@@ -30,9 +34,10 @@ export function RentBillForm() {
           <select
             value={clientId}
             onChange={e => setClientId(e.target.value)}
+            disabled={clientsLoading}
             className="w-full rounded border border-white/20 bg-transparent px-3 py-2 text-white"
           >
-            <option value="">Select client…</option>
+            <option value="">{clientsLoading ? 'Loading clients…' : 'Select client…'}</option>
             {clients.map(c => (
               <option key={c.id} value={c.id}>
                 {c.name}

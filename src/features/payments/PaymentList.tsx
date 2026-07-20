@@ -13,7 +13,7 @@ interface UnpaidBill {
   month: number
   year: number
   amount: number
-  client: { name: string }
+  client: { name: string; phone: string }
 }
 
 export function PaymentList() {
@@ -50,7 +50,7 @@ export function PaymentList() {
     generateReceiptPDF({
       receiptNumber: `${bill.id.slice(0, 8).toUpperCase()}`,
       clientName: bill.client.name,
-      clientPhone: '',
+      clientPhone: bill.client.phone,
       serviceType: bill.serviceType,
       periodLabel: `${monthName(bill.month)} ${bill.year}`,
       amount: bill.amount,

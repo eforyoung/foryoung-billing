@@ -39,7 +39,7 @@ export async function getUnpaidBills() {
 
   const bills = await prisma.bill.findMany({
     where: { isPaid: false },
-    include: { client: { select: { name: true } } },
+    include: { client: { select: { name: true, phone: true } } },
     orderBy: [{ year: 'asc' }, { month: 'asc' }],
   })
   return bills.map(b => ({

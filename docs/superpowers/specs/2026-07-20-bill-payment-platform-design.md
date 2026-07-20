@@ -201,9 +201,11 @@ to consolidate them into one bill.
 ```
 internetProfit = sum(paid Internet bills in period) − internetProviderCost
 waterProfit    = sum(paid Water bills in period) − waterProviderCost
-netProfit      = internetProfit + waterProfit
+rentCollected  = sum(paid Rent bills in period)
+netProfit      = internetProfit + waterProfit + rentCollected
 ```
-(Rent has no provider cost / P&L — it's pure income.)
+(Rent has no provider cost, so it contributes its full collected amount —
+pure income — directly to net profit rather than a "profit" of its own.)
 
 ## Feature Modules
 

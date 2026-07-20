@@ -16,7 +16,7 @@ export async function getPayments(filters: PaymentFilters) {
   const session = await auth()
   if (!session?.user) return []
 
-  return prisma.bill.findMany({
+  const bills = await prisma.bill.findMany({
     where: {
       isPaid: true,
       ...(filters.month ? { month: filters.month } : {}),
@@ -26,17 +26,26 @@ export async function getPayments(filters: PaymentFilters) {
     include: { client: { select: { name: true, phone: true } }, payment: true },
     orderBy: { paidDate: 'desc' },
   })
+  return bills.map(b => ({
+    ...b,
+    amount: Number(b.amount),
+    payment: b.payment ? { ...b.payment, amountPaid: Number(b.payment.amountPaid) } : null,
+  }))
 }
 
 export async function getUnpaidBills() {
   const session = await auth()
   if (!session?.user) return []
 
-  return prisma.bill.findMany({
+  const bills = await prisma.bill.findMany({
     where: { isPaid: false },
     include: { client: { select: { name: true } } },
     orderBy: [{ year: 'asc' }, { month: 'asc' }],
   })
+  return bills.map(b => ({
+    ...b,
+    amount: Number(b.amount),
+  }))
 }
 
 export async function markBillPaid(billId: string, paymentDate: string, notes?: string): Promise<ActionResult> {

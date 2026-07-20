@@ -12,7 +12,7 @@ interface UnpaidBill {
   serviceType: 'INTERNET' | 'WATER' | 'RENT'
   month: number
   year: number
-  amount: unknown
+  amount: number
   client: { name: string }
 }
 
@@ -53,7 +53,7 @@ export function PaymentList() {
       clientPhone: '',
       serviceType: bill.serviceType,
       periodLabel: `${monthName(bill.month)} ${bill.year}`,
-      amount: Number(bill.amount),
+      amount: bill.amount,
       paidDate: today,
     })
     refresh()
@@ -82,7 +82,7 @@ export function PaymentList() {
               <td className="py-2 text-white/70">
                 {monthName(b.month)} {b.year}
               </td>
-              <td className="py-2 text-white/70">{fmtXaf(Number(b.amount))}</td>
+              <td className="py-2 text-white/70">{fmtXaf(b.amount)}</td>
               <td className="py-2">
                 <Button size="sm" onClick={() => handleMarkPaid(b)}>
                   Mark Paid + Receipt

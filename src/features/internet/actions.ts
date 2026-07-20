@@ -58,7 +58,7 @@ export async function generateInternetBill(input: GenerateInternetBillInput): Pr
 
   try {
     let supersededIds: string[] = []
-    let monthsCount = input.monthsCount
+    let monthsCount = Math.max(1, input.monthsCount)
 
     if (input.consolidate) {
       const unpaid = await prisma.bill.findMany({
@@ -114,12 +114,13 @@ export async function updateInternetBill(
   if (!bill) return { success: false, error: 'Bill not found' }
   if (bill.isPaid) return { success: false, error: 'Cannot edit a paid bill.' }
 
-  const amount = computeInternetTotal(input.monthsCount)
+  const monthsCount = Math.max(1, input.monthsCount)
+  const amount = computeInternetTotal(monthsCount)
 
   try {
     await prisma.bill.update({
       where: { id: billId },
-      data: { month: input.month, year: input.year, monthsCount: input.monthsCount, amount },
+      data: { month: input.month, year: input.year, monthsCount, amount },
     })
   } catch (error: any) {
     if (error?.code === 'P2002') {

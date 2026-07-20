@@ -46,7 +46,8 @@ export async function generateRentBill(input: GenerateRentBillInput): Promise<Ac
   })
   if (existing) return { success: false, error: 'A bill already exists for this client and period.' }
 
-  const amount = computeRentTotal(input.amount, input.monthsCount)
+  const monthsCount = Math.max(1, input.monthsCount)
+  const amount = computeRentTotal(input.amount, monthsCount)
   const bill = await prisma.bill.create({
     data: {
       clientId: input.clientId,
@@ -54,7 +55,7 @@ export async function generateRentBill(input: GenerateRentBillInput): Promise<Ac
       month: input.month,
       year: input.year,
       amount,
-      monthsCount: input.monthsCount,
+      monthsCount,
     },
   })
 
@@ -83,12 +84,13 @@ export async function updateRentBill(
   if (!bill) return { success: false, error: 'Bill not found' }
   if (bill.isPaid) return { success: false, error: 'Cannot edit a paid bill.' }
 
-  const amount = computeRentTotal(input.amount, input.monthsCount)
+  const monthsCount = Math.max(1, input.monthsCount)
+  const amount = computeRentTotal(input.amount, monthsCount)
 
   try {
     await prisma.bill.update({
       where: { id: billId },
-      data: { month: input.month, year: input.year, amount, monthsCount: input.monthsCount },
+      data: { month: input.month, year: input.year, amount, monthsCount },
     })
   } catch (error: any) {
     if (error?.code === 'P2002') {

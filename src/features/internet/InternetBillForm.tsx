@@ -16,6 +16,7 @@ export function InternetBillForm() {
   const [year, setYear] = useState(new Date().getFullYear())
   const [arrears, setArrears] = useState<ArrearsSummary | null>(null)
   const [consolidate, setConsolidate] = useState(false)
+  const [manualMonths, setManualMonths] = useState(1)
   const [message, setMessage] = useState('')
 
   useEffect(() => {
@@ -33,7 +34,7 @@ export function InternetBillForm() {
     checkInternetArrears(clientId, month, year).then(a => setArrears(a.bills.length > 0 ? a : null))
   }, [clientId, month, year])
 
-  const monthsCount = consolidate && arrears ? arrears.totalMonths + 1 : 1
+  const monthsCount = consolidate && arrears ? arrears.totalMonths + 1 : manualMonths
   const total = computeInternetTotal(monthsCount)
 
   async function handleGenerate() {
@@ -64,6 +65,14 @@ export function InternetBillForm() {
         <div className="flex gap-3">
           <Input label="Month" type="number" min={1} max={12} value={month} onChange={e => setMonth(Number(e.target.value))} />
           <Input label="Year" type="number" value={year} onChange={e => setYear(Number(e.target.value))} />
+          <Input
+            label="Number of months"
+            type="number"
+            min={1}
+            value={monthsCount}
+            disabled={consolidate && !!arrears}
+            onChange={e => setManualMonths(Number(e.target.value))}
+          />
         </div>
 
         {arrears && (
@@ -72,7 +81,7 @@ export function InternetBillForm() {
             {arrears.bills.map(b => `${monthName(b.month)} ${b.year}`).join(', ')}) totaling {fmtXaf(arrears.totalAmount)}.
             <label className="mt-2 flex items-center gap-2">
               <input type="checkbox" checked={consolidate} onChange={e => setConsolidate(e.target.checked)} />
-              Consolidate into this bill
+              Consolidate into this bill (sets months automatically)
             </label>
           </div>
         )}

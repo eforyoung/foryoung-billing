@@ -10,11 +10,15 @@ export async function getRentBills() {
   const session = await auth()
   if (!session?.user) return []
 
-  return prisma.bill.findMany({
+  const bills = await prisma.bill.findMany({
     where: { serviceType: 'RENT' },
     include: { client: { select: { name: true } } },
     orderBy: [{ year: 'desc' }, { month: 'desc' }],
   })
+  return bills.map(b => ({
+    ...b,
+    amount: Number(b.amount),
+  }))
 }
 
 interface GenerateRentBillInput {

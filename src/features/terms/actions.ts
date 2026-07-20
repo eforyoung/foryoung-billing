@@ -7,6 +7,9 @@ import { revalidatePath } from 'next/cache'
 import type { ActionResult } from '@/lib/types'
 
 export async function getTerms(): Promise<string> {
+  const session = await auth()
+  if (!session?.user) return ''
+
   const settings = await prisma.billingSettings.findUnique({ where: { id: 1 } })
   return settings?.termsText ?? ''
 }

@@ -10,11 +10,16 @@ export async function getInternetBills() {
   const session = await auth()
   if (!session?.user) return []
 
-  return prisma.bill.findMany({
+  const bills = await prisma.bill.findMany({
     where: { serviceType: 'INTERNET' },
     include: { client: { select: { name: true } }, payment: true },
     orderBy: [{ year: 'desc' }, { month: 'desc' }],
   })
+  return bills.map(b => ({
+    ...b,
+    amount: Number(b.amount),
+    payment: b.payment ? { ...b.payment, amountPaid: Number(b.payment.amountPaid) } : null,
+  }))
 }
 
 export async function checkInternetArrears(clientId: string, month: number, year: number): Promise<ArrearsSummary> {

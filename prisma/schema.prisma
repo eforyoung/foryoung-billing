@@ -67,7 +67,7 @@ model Bill {
   payment     Payment?
   reading     WaterReading?
 
-  @@index([clientId, serviceType, year, month])
+  @@unique([clientId, serviceType, year, month])
 }
 
 model WaterReading {

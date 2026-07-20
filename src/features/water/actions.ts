@@ -10,11 +10,25 @@ export async function getWaterBills() {
   const session = await auth()
   if (!session?.user) return []
 
-  return prisma.bill.findMany({
+  const bills = await prisma.bill.findMany({
     where: { serviceType: 'WATER' },
     include: { client: { select: { name: true } }, reading: true },
     orderBy: [{ year: 'desc' }, { month: 'desc' }],
   })
+  return bills.map(b => ({
+    ...b,
+    amount: Number(b.amount),
+    reading: b.reading
+      ? {
+          ...b.reading,
+          consumption: Number(b.reading.consumption),
+          consumptionCost: Number(b.reading.consumptionCost),
+          electricityFee: Number(b.reading.electricityFee),
+          pumpServiceFee: Number(b.reading.pumpServiceFee),
+          defaultTaxShare: Number(b.reading.defaultTaxShare),
+        }
+      : null,
+  }))
 }
 
 export async function getPreviousReading(clientId: string): Promise<number | null> {

@@ -1,0 +1,116 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  CARETAKER
+}
+
+enum ServiceType {
+  INTERNET
+  WATER
+  RENT
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         Role
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+}
+
+model Client {
+  id        String          @id @default(uuid())
+  name      String
+  phone     String
+  email     String?
+  unit      String?
+  isActive  Boolean         @default(true)
+  notes     String?
+  createdAt DateTime        @default(now())
+  services  ClientService[]
+  bills     Bill[]
+  readings  WaterReading[]
+}
+
+model ClientService {
+  id       String      @id @default(uuid())
+  clientId String
+  client   Client      @relation(fields: [clientId], references: [id])
+  type     ServiceType
+  rate     Decimal?
+
+  @@unique([clientId, type])
+}
+
+model Bill {
+  id          String        @id @default(uuid())
+  clientId    String
+  client      Client        @relation(fields: [clientId], references: [id])
+  serviceType ServiceType
+  month       Int
+  year        Int
+  monthsCount Int           @default(1)
+  amount      Decimal
+  isPaid      Boolean       @default(false)
+  paidDate    DateTime?
+  createdAt   DateTime      @default(now())
+  payment     Payment?
+  reading     WaterReading?
+
+  @@index([clientId, serviceType, year, month])
+}
+
+model WaterReading {
+  id              String   @id @default(uuid())
+  clientId        String
+  client          Client   @relation(fields: [clientId], references: [id])
+  billId          String?  @unique
+  bill            Bill?    @relation(fields: [billId], references: [id])
+  month           Int
+  year            Int
+  previousReading Decimal
+  currentReading  Decimal
+  consumption     Decimal
+  consumptionCost Decimal
+  electricityFee  Decimal  @default(1000)
+  pumpServiceFee  Decimal  @default(2000)
+  defaultTaxShare Decimal  @default(0)
+  readingDate     DateTime @default(now())
+}
+
+model ProviderCost {
+  id          String      @id @default(uuid())
+  serviceType ServiceType
+  month       Int
+  year        Int
+  amount      Decimal
+  notes       String?
+
+  @@unique([serviceType, month, year])
+}
+
+model Payment {
+  id          String   @id @default(uuid())
+  billId      String   @unique
+  bill        Bill     @relation(fields: [billId], references: [id])
+  amountPaid  Decimal
+  paymentDate DateTime @default(now())
+  notes       String?
+  recordedBy  String?
+}
+
+model BillingSettings {
+  id        Int      @id @default(1)
+  termsText String   @default("")
+  updatedAt DateTime @updatedAt
+}

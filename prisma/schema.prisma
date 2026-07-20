@@ -99,6 +99,17 @@ model ProviderCost {
   @@unique([serviceType, month, year])
 }
 
+model VariableCost {
+  id     String   @id @default(uuid())
+  label  String
+  month  Int
+  year   Int
+  amount Decimal
+  notes  String?
+
+  @@unique([label, month, year])
+}
+
 model Payment {
   id          String   @id @default(uuid())
   billId      String   @unique

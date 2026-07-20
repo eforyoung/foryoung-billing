@@ -22,7 +22,7 @@ export function InternetBillForm() {
     getClientsForDropdown('INTERNET').then(result => {
       setClients(result)
       setClientsLoading(false)
-    })
+    }).catch(() => setClientsLoading(false))
   }, [])
 
   useEffect(() => {

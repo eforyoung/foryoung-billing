@@ -23,7 +23,7 @@ export function WaterReadingForm() {
     getClientsForDropdown('WATER').then(result => {
       setClients(result)
       setClientsLoading(false)
-    })
+    }).catch(() => setClientsLoading(false))
   }, [])
 
   useEffect(() => {

@@ -17,7 +17,7 @@ export function RentBillForm() {
     getClientsForDropdown('RENT').then(result => {
       setClients(result)
       setClientsLoading(false)
-    })
+    }).catch(() => setClientsLoading(false))
   }, [])
 
   async function handleGenerate() {

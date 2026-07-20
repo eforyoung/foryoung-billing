@@ -42,7 +42,7 @@ without sharing its database, auth, or deployment.
 | Database | PostgreSQL via Prisma — Vercel Postgres in prod, local Postgres in dev | Matches support-platform |
 | UI | Tailwind v4, dark navy/teal theme, `lib/ui` component set | Visual/behavioral consistency with support-platform |
 | PDF/Receipts | jsPDF vector direct-draw (not `window.print()` / html2canvas) | Avoids the "lines through text" bug found and fixed in support-platform's invoice PDF (`InvoicePDF.tsx`) |
-| Repo | `C:\JENEUS FILES\Foryoung's-Billing`, GitHub repo `Foryoung-Billing` | User-specified |
+| Repo | `C:\JENEUS FILES\Foryoungs-Billing`, GitHub repo `Foryoung-Billing` | User-specified |
 | Deploy | New Vercel project, custom domain `platform.jeneustech.com` | User-specified |
 
 ## Target Users

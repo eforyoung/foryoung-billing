@@ -25,6 +25,7 @@ interface GenerateRentBillInput {
   clientId: string
   month: number
   year: number
+  amount: number
 }
 
 export async function generateRentBill(input: GenerateRentBillInput): Promise<ActionResult<{ id: string }>> {
@@ -37,14 +38,14 @@ export async function generateRentBill(input: GenerateRentBillInput): Promise<Ac
   const service = await prisma.clientService.findUnique({
     where: { clientId_type: { clientId: input.clientId, type: 'RENT' } },
   })
-  if (!service || service.rate === null) return { success: false, error: 'Client has no rent rate configured.' }
+  if (!service) return { success: false, error: 'Client has no rent rate configured.' }
 
   const existing = await prisma.bill.findFirst({
     where: { clientId: input.clientId, serviceType: 'RENT', month: input.month, year: input.year },
   })
   if (existing) return { success: false, error: 'A bill already exists for this client and period.' }
 
-  const amount = computeRentTotal(Number(service.rate))
+  const amount = computeRentTotal(input.amount)
   const bill = await prisma.bill.create({
     data: { clientId: input.clientId, serviceType: 'RENT', month: input.month, year: input.year, amount },
   })
@@ -53,9 +54,19 @@ export async function generateRentBill(input: GenerateRentBillInput): Promise<Ac
   return { success: true, data: { id: bill.id } }
 }
 
+export async function getClientRentRate(clientId: string): Promise<number | null> {
+  const session = await auth()
+  if (!session?.user) return null
+
+  const service = await prisma.clientService.findUnique({
+    where: { clientId_type: { clientId, type: 'RENT' } },
+  })
+  return service?.rate ? Number(service.rate) : null
+}
+
 export async function updateRentBill(
   billId: string,
-  input: { month: number; year: number },
+  input: { month: number; year: number; amount: number },
 ): Promise<ActionResult> {
   const session = await auth()
   if (!session?.user) return { success: false, error: 'Not authenticated' }
@@ -64,12 +75,7 @@ export async function updateRentBill(
   if (!bill) return { success: false, error: 'Bill not found' }
   if (bill.isPaid) return { success: false, error: 'Cannot edit a paid bill.' }
 
-  const service = await prisma.clientService.findUnique({
-    where: { clientId_type: { clientId: bill.clientId, type: 'RENT' } },
-  })
-  if (!service || service.rate === null) return { success: false, error: 'Client has no rent rate configured.' }
-
-  const amount = computeRentTotal(Number(service.rate))
+  const amount = computeRentTotal(input.amount)
 
   try {
     await prisma.bill.update({

@@ -36,6 +36,7 @@ interface GenerateInternetBillInput {
   month: number
   year: number
   monthsCount: number
+  consolidate?: boolean
 }
 
 export async function generateInternetBill(input: GenerateInternetBillInput): Promise<ActionResult<{ id: string }>> {
@@ -50,18 +51,49 @@ export async function generateInternetBill(input: GenerateInternetBillInput): Pr
   })
   if (existing) return { success: false, error: 'A bill already exists for this client and period.' }
 
-  const amount = computeInternetTotal(input.monthsCount)
-  const bill = await prisma.bill.create({
-    data: {
-      clientId: input.clientId,
-      serviceType: 'INTERNET',
-      month: input.month,
-      year: input.year,
-      monthsCount: input.monthsCount,
-      amount,
-    },
-  })
+  try {
+    let supersededIds: string[] = []
+    let monthsCount = input.monthsCount
 
-  revalidatePath('/dashboard/internet-bills')
-  return { success: true, data: { id: bill.id } }
+    if (input.consolidate) {
+      const unpaid = await prisma.bill.findMany({
+        where: { clientId: input.clientId, serviceType: 'INTERNET', isPaid: false },
+      })
+      const arrears = findArrears(
+        unpaid.map(b => ({ id: b.id, month: b.month, year: b.year, monthsCount: b.monthsCount, amount: Number(b.amount) })),
+        input.month,
+        input.year,
+      )
+      supersededIds = arrears.bills.map(b => b.id)
+      monthsCount = arrears.totalMonths + 1
+    }
+
+    const amount = computeInternetTotal(monthsCount)
+
+    const bill = await prisma.$transaction(async (tx) => {
+      const created = await tx.bill.create({
+        data: {
+          clientId: input.clientId,
+          serviceType: 'INTERNET',
+          month: input.month,
+          year: input.year,
+          monthsCount,
+          amount,
+        },
+      })
+
+      if (supersededIds.length > 0) {
+        await tx.bill.deleteMany({ where: { id: { in: supersededIds } } })
+      }
+
+      return created
+    })
+
+    revalidatePath('/dashboard/internet-bills')
+    revalidatePath('/dashboard/payments')
+    return { success: true, data: { id: bill.id } }
+  } catch (error) {
+    console.error('generateInternetBill failed:', error)
+    return { success: false, error: 'Failed to generate bill.' }
+  }
 }

@@ -34,7 +34,7 @@ export function InternetBillForm() {
 
   async function handleGenerate() {
     setMessage('')
-    const result = await generateInternetBill({ clientId, month, year, monthsCount })
+    const result = await generateInternetBill({ clientId, month, year, monthsCount, consolidate })
     setMessage(result.success ? 'Bill generated.' : result.error)
   }
 

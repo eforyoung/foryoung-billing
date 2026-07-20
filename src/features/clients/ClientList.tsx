@@ -30,6 +30,7 @@ export function ClientList({ clients }: { clients: ClientWithServices[] }) {
           <tr>
             <th className="pb-2">Name</th>
             <th className="pb-2">Phone</th>
+            <th className="pb-2">Unit</th>
             <th className="pb-2">Services</th>
             <th className="pb-2">Status</th>
             <th className="pb-2">Actions</th>
@@ -40,6 +41,7 @@ export function ClientList({ clients }: { clients: ClientWithServices[] }) {
             <tr key={c.id} className="border-t border-white/10">
               <td className="py-2 text-white">{c.name}</td>
               <td className="py-2 text-white/70">{c.phone}</td>
+              <td className="py-2 text-white/70">{c.unit || '—'}</td>
               <td className="py-2 text-white/70">{c.services.map(s => s.type).join(', ') || '—'}</td>
               <td className="py-2">
                 <Badge color={c.isActive ? 'green' : 'grey'}>{c.isActive ? 'Active' : 'Inactive'}</Badge>

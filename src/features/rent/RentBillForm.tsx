@@ -6,7 +6,7 @@ import { getClientsForDropdown } from '@/features/clients/actions'
 import { generateRentBill } from './actions'
 
 export function RentBillForm() {
-  const [clients, setClients] = useState<{ id: string; name: string }[]>([])
+  const [clients, setClients] = useState<{ id: string; name: string; unit: string | null }[]>([])
   const [clientsLoading, setClientsLoading] = useState(true)
   const [clientId, setClientId] = useState('')
   const [month, setMonth] = useState(new Date().getMonth() + 1)
@@ -40,7 +40,7 @@ export function RentBillForm() {
             <option value="">{clientsLoading ? 'Loading clients…' : 'Select client…'}</option>
             {clients.map(c => (
               <option key={c.id} value={c.id}>
-                {c.name}
+                {c.name}{c.unit ? ` — ${c.unit}` : ''}
               </option>
             ))}
           </select>

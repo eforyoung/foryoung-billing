@@ -9,7 +9,7 @@ import { fmtXaf, monthName } from '@/lib/utils'
 import type { ArrearsSummary } from '@/features/billing/calculations'
 
 export function InternetBillForm() {
-  const [clients, setClients] = useState<{ id: string; name: string }[]>([])
+  const [clients, setClients] = useState<{ id: string; name: string; unit: string | null }[]>([])
   const [clientsLoading, setClientsLoading] = useState(true)
   const [clientId, setClientId] = useState('')
   const [month, setMonth] = useState(new Date().getMonth() + 1)
@@ -56,7 +56,7 @@ export function InternetBillForm() {
             <option value="">{clientsLoading ? 'Loading clients…' : 'Select client…'}</option>
             {clients.map(c => (
               <option key={c.id} value={c.id}>
-                {c.name}
+                {c.name}{c.unit ? ` — ${c.unit}` : ''}
               </option>
             ))}
           </select>

@@ -30,7 +30,7 @@ export async function getClientsForDropdown(serviceType?: ServiceType) {
       isActive: true,
       ...(serviceType ? { services: { some: { type: serviceType } } } : {}),
     },
-    select: { id: true, name: true },
+    select: { id: true, name: true, unit: true },
     orderBy: { name: 'asc' },
   })
   return clients

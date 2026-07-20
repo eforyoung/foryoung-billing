@@ -23,6 +23,7 @@ export async function RentBillList() {
               <td className="py-2 text-white">{b.client.name}</td>
               <td className="py-2 text-white/70">
                 {monthName(b.month)} {b.year}
+                {b.monthsCount > 1 ? ` (${b.monthsCount} months)` : ''}
               </td>
               <td className="py-2 text-white/70">{fmtXaf(Number(b.amount))}</td>
               <td className="py-2">
@@ -30,7 +31,9 @@ export async function RentBillList() {
               </td>
               <td className="py-2">
                 {!b.isPaid && (
-                  <RentBillRowActions bill={{ id: b.id, month: b.month, year: b.year, amount: Number(b.amount) }} />
+                  <RentBillRowActions
+                    bill={{ id: b.id, month: b.month, year: b.year, amount: Number(b.amount), monthsCount: b.monthsCount }}
+                  />
                 )}
               </td>
             </tr>

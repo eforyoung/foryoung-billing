@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import { Card, Button, Input } from '@/lib/ui'
 import { getClientsForDropdown } from '@/features/clients/actions'
 import { generateRentBill, getClientRentRate } from './actions'
+import { computeRentTotal } from '@/features/billing/calculations'
+import { fmtXaf } from '@/lib/utils'
 
 export function RentBillForm() {
   const [clients, setClients] = useState<{ id: string; name: string; unit: string | null }[]>([])
@@ -12,6 +14,7 @@ export function RentBillForm() {
   const [month, setMonth] = useState(new Date().getMonth() + 1)
   const [year, setYear] = useState(new Date().getFullYear())
   const [amount, setAmount] = useState(0)
+  const [monthsCount, setMonthsCount] = useState(1)
   const [message, setMessage] = useState('')
 
   useEffect(() => {
@@ -31,7 +34,7 @@ export function RentBillForm() {
 
   async function handleGenerate() {
     setMessage('')
-    const result = await generateRentBill({ clientId, month, year, amount })
+    const result = await generateRentBill({ clientId, month, year, amount, monthsCount })
     setMessage(result.success ? 'Bill generated.' : result.error)
   }
 
@@ -58,7 +61,14 @@ export function RentBillForm() {
           <Input label="Month" type="number" min={1} max={12} value={month} onChange={e => setMonth(Number(e.target.value))} />
           <Input label="Year" type="number" value={year} onChange={e => setYear(Number(e.target.value))} />
         </div>
-        <Input label="Amount" type="number" value={amount} onChange={e => setAmount(Number(e.target.value))} />
+        <div className="flex gap-3">
+          <Input label="Amount per month" type="number" value={amount} onChange={e => setAmount(Number(e.target.value))} />
+          <Input label="Number of months" type="number" min={1} value={monthsCount} onChange={e => setMonthsCount(Number(e.target.value))} />
+        </div>
+        <p className="text-sm text-white/70">
+          Total: <span className="font-semibold text-white">{fmtXaf(computeRentTotal(amount, monthsCount))}</span> (
+          {monthsCount} month{monthsCount > 1 ? 's' : ''})
+        </p>
         {message && <p className="text-sm text-teal">{message}</p>}
         <Button onClick={handleGenerate} disabled={!clientId}>
           Generate Bill

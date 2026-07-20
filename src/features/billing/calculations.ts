@@ -47,8 +47,8 @@ export function computeInternetTotal(monthsCount: number): number {
   return 10000 * monthsCount
 }
 
-export function computeRentTotal(rate: number): number {
-  return rate
+export function computeRentTotal(rate: number, monthsCount: number = 1): number {
+  return rate * monthsCount
 }
 
 export interface ArrearsBill {

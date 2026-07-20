@@ -53,6 +53,10 @@ describe('computeRentTotal', () => {
   it('returns the client service rate as-is', () => {
     expect(computeRentTotal(140000)).toBe(140000)
   })
+
+  it('multiplies by monthsCount when paying for multiple months', () => {
+    expect(computeRentTotal(140000, 3)).toBe(420000)
+  })
 })
 
 describe('findArrears', () => {

@@ -64,6 +64,9 @@ export async function generateWaterBill(input: GenerateWaterBillInput): Promise<
     return { success: false, error: 'Current reading cannot be less than the previous reading.' }
   }
 
+  const client = await prisma.client.findUnique({ where: { id: input.clientId } })
+  if (!client || !client.isActive) return { success: false, error: 'Client is not active.' }
+
   const existing = await prisma.bill.findFirst({
     where: { clientId: input.clientId, serviceType: 'WATER', month: input.month, year: input.year },
   })

@@ -84,10 +84,10 @@ export function PaymentHistory() {
             onChange={e => setServiceType(e.target.value)}
             className="rounded border border-white/20 bg-transparent px-3 py-2 text-white"
           >
-            <option value="">All</option>
-            <option value="INTERNET">INTERNET</option>
-            <option value="WATER">WATER</option>
-            <option value="RENT">RENT</option>
+            <option value="" className="bg-dark-card text-white">All</option>
+            <option value="INTERNET" className="bg-dark-card text-white">INTERNET</option>
+            <option value="WATER" className="bg-dark-card text-white">WATER</option>
+            <option value="RENT" className="bg-dark-card text-white">RENT</option>
           </select>
         </div>
         <Button onClick={refresh} disabled={loading}>

@@ -49,9 +49,9 @@ export function RentBillForm() {
             disabled={clientsLoading}
             className="w-full rounded border border-white/20 bg-transparent px-3 py-2 text-white"
           >
-            <option value="">{clientsLoading ? 'Loading clients…' : 'Select client…'}</option>
+            <option value="" className="bg-dark-card text-white">{clientsLoading ? 'Loading clients…' : 'Select client…'}</option>
             {clients.map(c => (
-              <option key={c.id} value={c.id}>
+              <option key={c.id} value={c.id} className="bg-dark-card text-white">
                 {c.name}{c.unit ? ` — ${c.unit}` : ''}
               </option>
             ))}

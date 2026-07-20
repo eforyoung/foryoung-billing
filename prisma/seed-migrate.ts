@@ -66,12 +66,12 @@ interface LegacyProviderCost {
 
 interface LegacyData {
   data: {
-    bp_clients?: LegacyClient[]
-    bp_bills?: LegacyBill[]
-    bp_waterReadings?: LegacyWaterReading[]
-    bp_payments?: LegacyPayment[]
-    bp_providerCosts?: LegacyProviderCost[]
-    bp_terms?: string
+    clients?: LegacyClient[]
+    bills?: LegacyBill[]
+    waterReadings?: LegacyWaterReading[]
+    payments?: LegacyPayment[]
+    providerCosts?: LegacyProviderCost[]
+    terms?: string
   }
 }
 
@@ -90,7 +90,7 @@ async function main() {
 
   const clientIdMap = new Map<number, string>()
 
-  for (const c of legacy.bp_clients ?? []) {
+  for (const c of legacy.clients ?? []) {
     const client = await prisma.client.create({
       data: {
         name: c.name,
@@ -117,7 +117,7 @@ async function main() {
   console.log(`Migrated ${clientIdMap.size} clients.`)
 
   const billIdMap = new Map<number, string>()
-  for (const b of legacy.bp_bills ?? []) {
+  for (const b of legacy.bills ?? []) {
     const clientId = clientIdMap.get(b.clientId)
     if (!clientId) continue
     const bill = await prisma.bill.create({
@@ -138,7 +138,7 @@ async function main() {
   console.log(`Migrated ${billIdMap.size} bills.`)
 
   let readingCount = 0
-  for (const r of legacy.bp_waterReadings ?? []) {
+  for (const r of legacy.waterReadings ?? []) {
     const clientId = clientIdMap.get(r.clientId)
     if (!clientId) continue
     await prisma.waterReading.create({
@@ -161,7 +161,7 @@ async function main() {
   console.log(`Migrated ${readingCount} water readings.`)
 
   let paymentCount = 0
-  for (const p of legacy.bp_payments ?? []) {
+  for (const p of legacy.payments ?? []) {
     const billId = billIdMap.get(p.billId)
     if (!billId) continue
     await prisma.payment.create({
@@ -172,7 +172,7 @@ async function main() {
   console.log(`Migrated ${paymentCount} payments.`)
 
   let costCount = 0
-  for (const pc of legacy.bp_providerCosts ?? []) {
+  for (const pc of legacy.providerCosts ?? []) {
     await prisma.providerCost.create({
       data: { serviceType: SERVICE_MAP[pc.serviceType], month: pc.month, year: pc.year, amount: pc.amount, notes: pc.notes },
     })
@@ -180,11 +180,11 @@ async function main() {
   }
   console.log(`Migrated ${costCount} provider costs.`)
 
-  if (legacy.bp_terms) {
+  if (legacy.terms) {
     await prisma.billingSettings.upsert({
       where: { id: 1 },
-      update: { termsText: legacy.bp_terms },
-      create: { id: 1, termsText: legacy.bp_terms },
+      update: { termsText: legacy.terms },
+      create: { id: 1, termsText: legacy.terms },
     })
     console.log('Migrated terms text.')
   }

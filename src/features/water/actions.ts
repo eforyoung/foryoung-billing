@@ -21,6 +21,8 @@ export async function getWaterBills() {
     reading: b.reading
       ? {
           ...b.reading,
+          previousReading: Number(b.reading.previousReading),
+          currentReading: Number(b.reading.currentReading),
           consumption: Number(b.reading.consumption),
           consumptionCost: Number(b.reading.consumptionCost),
           electricityFee: Number(b.reading.electricityFee),
@@ -115,4 +117,55 @@ export async function generateWaterBill(input: GenerateWaterBillInput): Promise<
 
   revalidatePath('/dashboard/water-bills')
   return { success: true, data: { id: bill.id } }
+}
+
+export async function updateWaterBill(
+  billId: string,
+  input: { month: number; year: number; currentReading: number; previousReading: number },
+): Promise<ActionResult> {
+  const session = await auth()
+  if (!session?.user) return { success: false, error: 'Not authenticated' }
+
+  if (input.currentReading < input.previousReading) {
+    return { success: false, error: 'Current reading cannot be less than the previous reading.' }
+  }
+
+  const bill = await prisma.bill.findUnique({ where: { id: billId } })
+  if (!bill) return { success: false, error: 'Bill not found' }
+  if (bill.isPaid) return { success: false, error: 'Cannot edit a paid bill.' }
+
+  const tenants = await countActiveWaterTenants()
+  const breakdown = computeWaterBill(input.currentReading, input.previousReading, tenants)
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      await tx.bill.update({
+        where: { id: billId },
+        data: { month: input.month, year: input.year, amount: breakdown.total },
+      })
+      await tx.waterReading.update({
+        where: { billId },
+        data: {
+          month: input.month,
+          year: input.year,
+          previousReading: input.previousReading,
+          currentReading: input.currentReading,
+          consumption: breakdown.consumption,
+          consumptionCost: breakdown.consumptionCost,
+          electricityFee: breakdown.electricityFee,
+          pumpServiceFee: breakdown.pumpServiceFee,
+          defaultTaxShare: breakdown.defaultTaxShare,
+        },
+      })
+    })
+  } catch (error: any) {
+    if (error?.code === 'P2002') {
+      return { success: false, error: 'A bill already exists for this client and period.' }
+    }
+    console.error('updateWaterBill failed:', error)
+    return { success: false, error: 'Failed to update bill.' }
+  }
+
+  revalidatePath('/dashboard/water-bills')
+  return { success: true, data: undefined }
 }

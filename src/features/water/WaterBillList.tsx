@@ -1,6 +1,7 @@
 import { Card, Badge } from '@/lib/ui'
 import { fmtXaf, monthName } from '@/lib/utils'
 import { getWaterBills } from './actions'
+import { WaterBillRowActions } from './WaterBillRowActions'
 
 export async function WaterBillList() {
   const bills = await getWaterBills()
@@ -14,6 +15,7 @@ export async function WaterBillList() {
             <th className="pb-2">Consumption</th>
             <th className="pb-2">Amount</th>
             <th className="pb-2">Status</th>
+            <th className="pb-2">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -27,6 +29,19 @@ export async function WaterBillList() {
               <td className="py-2 text-white/70">{fmtXaf(Number(b.amount))}</td>
               <td className="py-2">
                 <Badge color={b.isPaid ? 'green' : 'amber'}>{b.isPaid ? 'Paid' : 'Unpaid'}</Badge>
+              </td>
+              <td className="py-2">
+                {!b.isPaid && b.reading && (
+                  <WaterBillRowActions
+                    bill={{
+                      id: b.id,
+                      month: b.month,
+                      year: b.year,
+                      previousReading: b.reading.previousReading,
+                      currentReading: b.reading.currentReading,
+                    }}
+                  />
+                )}
               </td>
             </tr>
           ))}

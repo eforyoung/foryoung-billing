@@ -1,0 +1,38 @@
+'use client'
+
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { cn } from '@/lib/utils'
+
+const NAV_ITEMS = [
+  { href: '/dashboard', label: 'Dashboard', adminOnly: false },
+  { href: '/dashboard/clients', label: 'Clients', adminOnly: false },
+  { href: '/dashboard/internet-bills', label: 'Internet Bills', adminOnly: false },
+  { href: '/dashboard/water-bills', label: 'Water Bills', adminOnly: false },
+  { href: '/dashboard/rent-bills', label: 'Rent Bills', adminOnly: false },
+  { href: '/dashboard/payments', label: 'Payments', adminOnly: false },
+  { href: '/dashboard/reports', label: 'Reports', adminOnly: true },
+  { href: '/dashboard/terms', label: 'Terms', adminOnly: true },
+]
+
+export function Sidebar({ isAdmin }: { isAdmin: boolean }) {
+  const pathname = usePathname()
+  const items = NAV_ITEMS.filter(item => !item.adminOnly || isAdmin)
+
+  return (
+    <nav className="hidden w-56 flex-col gap-1 border-r border-white/10 bg-dark-card p-4 md:flex">
+      {items.map(item => (
+        <Link
+          key={item.href}
+          href={item.href}
+          className={cn(
+            'rounded px-3 py-2 text-sm text-white/70 hover:bg-navy hover:text-white',
+            pathname === item.href && 'bg-navy font-semibold text-white',
+          )}
+        >
+          {item.label}
+        </Link>
+      ))}
+    </nav>
+  )
+}

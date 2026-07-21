@@ -26,8 +26,10 @@ export function Sidebar({ isAdmin }: { isAdmin: boolean }) {
           key={item.href}
           href={item.href}
           className={cn(
-            'rounded px-3 py-2 text-sm text-white/70 hover:bg-navy hover:text-white',
-            pathname === item.href && 'bg-navy font-semibold text-white',
+            'flex items-center gap-2 rounded px-3 py-2 text-sm text-white/70 transition-colors',
+            pathname === item.href
+              ? 'bg-navy font-semibold text-white hover:bg-navy hover:text-white'
+              : 'hover:bg-navy hover:text-teal',
           )}
         >
           {item.label}

@@ -12,7 +12,10 @@ export function Header({ userName }: { userName: string }) {
       </div>
       <div className="flex items-center gap-3">
         <span className="text-sm text-white/70">{userName}</span>
-        <button onClick={() => signOut({ callbackUrl: '/login' })} className="text-sm text-white/50 hover:text-white">
+        <button
+          onClick={() => signOut({ callbackUrl: '/login' })}
+          className="text-sm text-white/50 transition-colors hover:text-teal"
+        >
           Sign out
         </button>
       </div>

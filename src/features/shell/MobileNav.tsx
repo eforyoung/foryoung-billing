@@ -18,7 +18,10 @@ export function MobileNav() {
         <Link
           key={item.href}
           href={item.href}
-          className={cn('text-xs text-white/60', pathname === item.href && 'font-semibold text-teal')}
+          className={cn(
+            'text-xs text-white/60 transition-colors hover:text-teal',
+            pathname === item.href && 'font-semibold text-teal',
+          )}
         >
           {item.label}
         </Link>

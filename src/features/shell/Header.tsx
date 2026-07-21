@@ -1,15 +1,11 @@
 'use client'
 
-import Image from 'next/image'
 import { signOut } from 'next-auth/react'
 
 export function Header({ userName }: { userName: string }) {
   return (
     <header className="flex items-center justify-between border-b border-white/10 bg-dark-card px-4 py-3">
-      <div className="flex items-center gap-2">
-        <Image src="/logo.png" alt="4Young Inc." width={36} height={29} className="rounded" />
-        <span className="font-semibold text-white">Foryoung&apos;s Billing</span>
-      </div>
+      <span className="font-semibold text-white">Foryoung&apos;s Billing</span>
       <div className="flex items-center gap-3">
         <span className="text-sm text-white/70">{userName}</span>
         <button

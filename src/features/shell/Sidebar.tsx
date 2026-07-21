@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -21,6 +22,9 @@ export function Sidebar({ isAdmin }: { isAdmin: boolean }) {
 
   return (
     <nav className="hidden w-56 flex-col gap-1 border-r border-white/10 bg-dark-card p-4 md:flex">
+      <div className="mb-4 flex justify-center">
+        <Image src="/logo.png" alt="4Young Inc." width={176} height={141} priority />
+      </div>
       {items.map(item => (
         <Link
           key={item.href}

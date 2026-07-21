@@ -21,22 +21,42 @@ const SERVICE_LABELS: Record<ReceiptData['serviceType'], string> = {
   RENT: 'Rent',
 }
 
-export function generateReceiptPDF(data: ReceiptData): void {
+function loadLogo(): Promise<HTMLImageElement | null> {
+  return new Promise(resolve => {
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+    img.onload = () => resolve(img)
+    img.onerror = () => resolve(null) // silently skip if logo fails to load
+    img.src = '/logo.png'
+  })
+}
+
+export async function generateReceiptPDF(data: ReceiptData): Promise<void> {
+  const logo = await loadLogo()
+
   const pdf = new jsPDF('p', 'mm', 'a4')
   const W = 210
   const M = 20
   const rightX = W - M
   let y = M
+  let textX = M
+
+  if (logo && logo.width > 0) {
+    const logoW = 20
+    const logoH = (logo.height / logo.width) * logoW
+    pdf.addImage(logo, 'PNG', M, y - 4, logoW, logoH)
+    textX = M + logoW + 5
+  }
 
   pdf.setFont('helvetica', 'bold')
   pdf.setFontSize(16)
   pdf.setTextColor('#1e3a5f')
-  pdf.text('JENEUS CO. LTD', M, y)
+  pdf.text('4YOUNG INC.', textX, y)
 
   pdf.setFont('helvetica', 'normal')
-  pdf.setFontSize(9)
+  pdf.setFontSize(8)
   pdf.setTextColor('#64748b')
-  pdf.text('Immeuble Commercial Bank, 4th Floor, Rue Njo Njo Bonapriso', M, y + 6)
+  pdf.text('FOR THE FUTURE', textX, y + 6)
 
   pdf.setFont('helvetica', 'bold')
   pdf.setFontSize(13)
@@ -47,7 +67,7 @@ export function generateReceiptPDF(data: ReceiptData): void {
   pdf.setTextColor('#64748b')
   pdf.text(data.receiptNumber, rightX, y + 6, { align: 'right' })
 
-  y += 16
+  y += 18
   pdf.setDrawColor('#0D9488')
   pdf.setLineWidth(0.8)
   pdf.line(M, y, rightX, y)
@@ -117,7 +137,7 @@ export function generateReceiptPDF(data: ReceiptData): void {
   pdf.setFont('helvetica', 'normal')
   pdf.setFontSize(7)
   pdf.setTextColor('#94a3b8')
-  pdf.text('JENEUS CO. LTD', M, 292)
+  pdf.text('4YOUNG INC.', M, 292)
 
   pdf.save(`Receipt-${data.receiptNumber.replace(/\//g, '-')}.pdf`)
 }

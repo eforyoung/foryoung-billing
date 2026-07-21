@@ -47,7 +47,7 @@ export function PaymentList() {
       setMessage(result.error)
       return
     }
-    generateReceiptPDF({
+    await generateReceiptPDF({
       receiptNumber: `${bill.id.slice(0, 8).toUpperCase()}`,
       clientName: bill.client.name,
       clientPhone: bill.client.phone,

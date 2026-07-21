@@ -7,6 +7,7 @@ export async function RentBillList() {
   const bills = await getRentBills()
   return (
     <Card title="Rent Bills">
+      <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
         <thead className="text-white/50">
           <tr>
@@ -49,6 +50,7 @@ export async function RentBillList() {
           ))}
         </tbody>
       </table>
+      </div>
     </Card>
   )
 }

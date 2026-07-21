@@ -25,6 +25,7 @@ export function ClientList({ clients }: { clients: ClientWithServices[] }) {
       <div className="mb-4 flex justify-end">
         <Button onClick={openNew}>+ Add Client</Button>
       </div>
+      <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
         <thead className="text-white/50">
           <tr>
@@ -58,6 +59,7 @@ export function ClientList({ clients }: { clients: ClientWithServices[] }) {
           ))}
         </tbody>
       </table>
+      </div>
       <ClientForm open={formOpen} onClose={() => setFormOpen(false)} editing={editing} />
     </Card>
   )

@@ -7,6 +7,7 @@ export async function WaterBillList() {
   const bills = await getWaterBills()
   return (
     <Card title="Water Bills">
+      <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
         <thead className="text-white/50">
           <tr>
@@ -47,6 +48,7 @@ export async function WaterBillList() {
           ))}
         </tbody>
       </table>
+      </div>
     </Card>
   )
 }

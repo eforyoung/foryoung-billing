@@ -95,6 +95,7 @@ export function PaymentHistory() {
         </Button>
       </div>
 
+      <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
         <thead className="text-white/50">
           <tr>
@@ -134,6 +135,7 @@ export function PaymentHistory() {
           )}
         </tbody>
       </table>
+      </div>
     </Card>
   )
 }

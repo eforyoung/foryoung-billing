@@ -7,6 +7,7 @@ export async function InternetBillList() {
   const bills = await getInternetBills()
   return (
     <Card title="Internet Bills">
+      <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
         <thead className="text-white/50">
           <tr>
@@ -48,6 +49,7 @@ export async function InternetBillList() {
           ))}
         </tbody>
       </table>
+      </div>
     </Card>
   )
 }

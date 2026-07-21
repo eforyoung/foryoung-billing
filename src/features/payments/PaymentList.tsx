@@ -62,6 +62,7 @@ export function PaymentList() {
   return (
     <Card title="Unpaid Bills">
       {message && <p className="mb-2 text-sm text-red-400">{message}</p>}
+      <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
         <thead className="text-white/50">
           <tr>
@@ -99,6 +100,7 @@ export function PaymentList() {
           )}
         </tbody>
       </table>
+      </div>
     </Card>
   )
 }

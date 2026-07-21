@@ -14,10 +14,10 @@ export function SlideOver({ open, onClose, title, children }: SlideOverProps) {
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/60" onClick={onClose}>
       <div
-        className="h-full w-full max-w-md overflow-y-auto border-l border-white/10 bg-dark-card p-6"
+        className="h-full w-full max-w-md overflow-y-auto border-l border-slate-200 bg-white p-6 shadow-sm"
         onClick={e => e.stopPropagation()}
       >
-        {title && <h2 className="mb-4 text-lg font-semibold text-white">{title}</h2>}
+        {title && <h2 className="mb-4 text-lg font-semibold text-slate-900">{title}</h2>}
         {children}
       </div>
     </div>

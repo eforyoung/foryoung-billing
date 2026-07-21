@@ -4,12 +4,12 @@ import type { ReactNode } from 'react'
 type Color = 'red' | 'amber' | 'blue' | 'green' | 'purple' | 'grey'
 
 const colorClasses: Record<Color, string> = {
-  red: 'bg-red-500/15 text-red-400',
-  amber: 'bg-amber-500/15 text-amber-400',
-  blue: 'bg-blue-500/15 text-blue-400',
-  green: 'bg-green-500/15 text-green-400',
-  purple: 'bg-purple-500/15 text-purple-400',
-  grey: 'bg-white/10 text-white/60',
+  red: 'bg-red-100 text-red-700',
+  amber: 'bg-amber-100 text-amber-700',
+  blue: 'bg-blue-100 text-blue-700',
+  green: 'bg-green-100 text-green-700',
+  purple: 'bg-purple-100 text-purple-700',
+  grey: 'bg-slate-100 text-slate-600',
 }
 
 export function Badge({ color, children }: { color: Color; children: ReactNode }) {

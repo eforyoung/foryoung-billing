@@ -15,7 +15,7 @@ export function DashboardShell({ userName, isAdmin, children }: DashboardShellPr
       <Sidebar isAdmin={isAdmin} />
       <div className="flex min-w-0 flex-1 flex-col">
         <Header userName={userName} />
-        <main className="min-w-0 flex-1 p-4 pb-20 md:p-6">{children}</main>
+        <main className="min-w-0 flex-1 bg-slate-100 p-4 pb-20 md:p-6">{children}</main>
         <MobileNav isAdmin={isAdmin} />
       </div>
     </div>

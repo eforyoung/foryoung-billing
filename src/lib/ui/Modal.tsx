@@ -24,10 +24,10 @@ export function Modal({ open, onClose, size = 'md', title, children }: ModalProp
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
       <div
-        className={cn('w-full rounded-lg border border-white/10 bg-dark-card p-6', sizeClasses[size])}
+        className={cn('w-full rounded-lg border border-slate-200 bg-white p-6 shadow-sm', sizeClasses[size])}
         onClick={e => e.stopPropagation()}
       >
-        {title && <h2 className="mb-4 text-lg font-semibold text-white">{title}</h2>}
+        {title && <h2 className="mb-4 text-lg font-semibold text-slate-900">{title}</h2>}
         {children}
       </div>
     </div>

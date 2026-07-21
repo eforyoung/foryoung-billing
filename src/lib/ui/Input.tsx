@@ -12,17 +12,17 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
 ) {
   return (
     <div>
-      {label && <label className="mb-1 block text-sm text-white/70">{label}</label>}
+      {label && <label className="mb-1 block text-sm text-slate-600">{label}</label>}
       <input
         ref={ref}
         className={cn(
-          'w-full rounded border border-white/20 bg-transparent px-3 py-2 text-white placeholder:text-white/30',
+          'w-full rounded border border-slate-300 bg-white px-3 py-2 text-slate-900 placeholder:text-slate-400',
           error && 'border-red-500',
           className,
         )}
         {...props}
       />
-      {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
+      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
     </div>
   )
 })
@@ -38,17 +38,17 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function 
 ) {
   return (
     <div>
-      {label && <label className="mb-1 block text-sm text-white/70">{label}</label>}
+      {label && <label className="mb-1 block text-sm text-slate-600">{label}</label>}
       <textarea
         ref={ref}
         className={cn(
-          'w-full rounded border border-white/20 bg-transparent px-3 py-2 text-white placeholder:text-white/30',
+          'w-full rounded border border-slate-300 bg-white px-3 py-2 text-slate-900 placeholder:text-slate-400',
           error && 'border-red-500',
           className,
         )}
         {...props}
       />
-      {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
+      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
     </div>
   )
 })

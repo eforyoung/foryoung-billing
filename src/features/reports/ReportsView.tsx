@@ -70,16 +70,16 @@ export function ReportsView() {
           <div className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
               <div>
-                <p className="text-white/50">Internet Collected</p>
-                <p className="text-white">{fmtXaf(report.internetCollected)}</p>
+                <p className="text-slate-500">Internet Collected</p>
+                <p className="text-slate-900">{fmtXaf(report.internetCollected)}</p>
               </div>
               <div>
-                <p className="text-white/50">Water Collected</p>
-                <p className="text-white">{fmtXaf(report.waterCollected)}</p>
+                <p className="text-slate-500">Water Collected</p>
+                <p className="text-slate-900">{fmtXaf(report.waterCollected)}</p>
               </div>
               <div>
-                <p className="text-white/50">Rent Collected</p>
-                <p className="text-white">{fmtXaf(report.rentCollected)}</p>
+                <p className="text-slate-500">Rent Collected</p>
+                <p className="text-slate-900">{fmtXaf(report.rentCollected)}</p>
               </div>
             </div>
 
@@ -101,24 +101,24 @@ export function ReportsView() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-white/10 pt-4 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-slate-200 pt-4 text-sm">
               <div>
-                <p className="text-white/50">Internet Profit</p>
-                <p className="text-white">{fmtXaf(report.internetProfit)}</p>
+                <p className="text-slate-500">Internet Profit</p>
+                <p className="text-slate-900">{fmtXaf(report.internetProfit)}</p>
               </div>
               <div>
-                <p className="text-white/50">Water Profit</p>
-                <p className="text-white">{fmtXaf(report.waterProfit)}</p>
+                <p className="text-slate-500">Water Profit</p>
+                <p className="text-slate-900">{fmtXaf(report.waterProfit)}</p>
               </div>
               <div>
-                <p className="text-white/50">Variable Costs</p>
-                <p className="text-white">{fmtXaf(report.totalVariableCosts)}</p>
+                <p className="text-slate-500">Variable Costs</p>
+                <p className="text-slate-900">{fmtXaf(report.totalVariableCosts)}</p>
               </div>
             </div>
 
-            <div className="border-t border-white/10 pt-4">
+            <div className="border-t border-slate-200 pt-4">
               <p className="font-semibold text-teal">Net Profit</p>
-              <p className="text-lg font-bold text-white">{fmtXaf(report.netProfit)}</p>
+              <p className="text-lg font-bold text-slate-900">{fmtXaf(report.netProfit)}</p>
             </div>
           </div>
         )}
@@ -136,7 +136,7 @@ export function ReportsView() {
 
             <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="text-white/50">
+              <thead className="text-slate-500">
                 <tr>
                   <th className="pb-2">Label</th>
                   <th className="pb-2">Amount</th>
@@ -146,12 +146,12 @@ export function ReportsView() {
               </thead>
               <tbody>
                 {report.variableCosts.map(v => (
-                  <tr key={v.id} className="border-t border-white/10">
-                    <td className="py-2 text-white">{v.label}</td>
-                    <td className="py-2 text-white/70">{fmtXaf(v.amount)}</td>
-                    <td className="py-2 text-white/70">{v.notes || '—'}</td>
+                  <tr key={v.id} className="border-t border-slate-100">
+                    <td className="py-2 text-slate-900">{v.label}</td>
+                    <td className="py-2 text-slate-600">{fmtXaf(v.amount)}</td>
+                    <td className="py-2 text-slate-600">{v.notes || '—'}</td>
                     <td className="py-2">
-                      <button className="text-red-400 hover:underline" onClick={() => handleDeleteVariableCost(v.id)}>
+                      <button className="text-red-600 hover:underline" onClick={() => handleDeleteVariableCost(v.id)}>
                         Delete
                       </button>
                     </td>
@@ -159,7 +159,7 @@ export function ReportsView() {
                 ))}
                 {report.variableCosts.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="py-4 text-center text-white/40">
+                    <td colSpan={4} className="py-4 text-center text-slate-400">
                       No variable costs recorded for this period.
                     </td>
                   </tr>
@@ -168,9 +168,9 @@ export function ReportsView() {
             </table>
             </div>
 
-            <div className="flex justify-between border-t border-white/10 pt-3 text-sm font-semibold">
-              <span className="text-white/70">Total Variable Costs</span>
-              <span className="text-white">{fmtXaf(report.totalVariableCosts)}</span>
+            <div className="flex justify-between border-t border-slate-200 pt-3 text-sm font-semibold">
+              <span className="text-slate-600">Total Variable Costs</span>
+              <span className="text-slate-900">{fmtXaf(report.totalVariableCosts)}</span>
             </div>
           </div>
         )}

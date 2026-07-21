@@ -61,10 +61,10 @@ export function PaymentList() {
 
   return (
     <Card title="Unpaid Bills">
-      {message && <p className="mb-2 text-sm text-red-400">{message}</p>}
+      {message && <p className="mb-2 text-sm text-red-600">{message}</p>}
       <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
-        <thead className="text-white/50">
+        <thead className="text-slate-500">
           <tr>
             <th className="pb-2">Client</th>
             <th className="pb-2">Service</th>
@@ -75,15 +75,15 @@ export function PaymentList() {
         </thead>
         <tbody>
           {bills.map(b => (
-            <tr key={b.id} className="border-t border-white/10">
-              <td className="py-2 text-white">{b.client.name}</td>
+            <tr key={b.id} className="border-t border-slate-100">
+              <td className="py-2 text-slate-900">{b.client.name}</td>
               <td className="py-2">
                 <Badge color="blue">{b.serviceType}</Badge>
               </td>
-              <td className="py-2 text-white/70">
+              <td className="py-2 text-slate-600">
                 {monthName(b.month)} {b.year}
               </td>
-              <td className="py-2 text-white/70">{fmtXaf(b.amount)}</td>
+              <td className="py-2 text-slate-600">{fmtXaf(b.amount)}</td>
               <td className="py-2">
                 <Button size="sm" onClick={() => handleMarkPaid(b)}>
                   Mark Paid + Receipt
@@ -93,7 +93,7 @@ export function PaymentList() {
           ))}
           {bills.length === 0 && (
             <tr>
-              <td colSpan={5} className="py-4 text-center text-white/40">
+              <td colSpan={5} className="py-4 text-center text-slate-400">
                 No unpaid bills.
               </td>
             </tr>

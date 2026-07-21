@@ -42,7 +42,7 @@ export function RentBillRowActions({ bill }: RentBillRowActionsProps) {
       </button>
       <Modal open={open} onClose={() => setOpen(false)} title="Edit Rent Bill">
         <div className="space-y-3">
-          {error && <p className="text-sm text-red-400">{error}</p>}
+          {error && <p className="text-sm text-red-600">{error}</p>}
           <div className="flex flex-wrap gap-3">
             <Input label="Month" type="number" min={1} max={12} value={month} onChange={e => setMonth(Number(e.target.value))} />
             <Input label="Year" type="number" value={year} onChange={e => setYear(Number(e.target.value))} />
@@ -52,8 +52,8 @@ export function RentBillRowActions({ bill }: RentBillRowActionsProps) {
             <Input label="Number of months" type="number" min={1} value={monthsCount} onChange={e => setMonthsCount(Number(e.target.value))} />
           </div>
           <Input label="Due date" type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} />
-          <p className="text-sm text-white/70">
-            Total: <span className="font-semibold text-white">{fmtXaf(computeRentTotal(amount, monthsCount))}</span> (
+          <p className="text-sm text-slate-600">
+            Total: <span className="font-semibold text-slate-900">{fmtXaf(computeRentTotal(amount, monthsCount))}</span> (
             {monthsCount} month{monthsCount > 1 ? 's' : ''})
           </p>
           <div className="flex gap-2 pt-2">

@@ -58,36 +58,36 @@ export function PaymentHistory() {
     <Card title="Payment History">
       <div className="mb-3 flex flex-wrap items-end gap-3">
         <div>
-          <label className="mb-1 block text-sm text-white/70">Month</label>
+          <label className="mb-1 block text-sm text-slate-600">Month</label>
           <input
             type="number"
             min={1}
             max={12}
             value={month}
             onChange={e => setMonth(e.target.value)}
-            className="w-24 rounded border border-white/20 bg-transparent px-3 py-2 text-white"
+            className="w-24 rounded border border-slate-300 bg-white px-3 py-2 text-slate-900"
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm text-white/70">Year</label>
+          <label className="mb-1 block text-sm text-slate-600">Year</label>
           <input
             type="number"
             value={year}
             onChange={e => setYear(e.target.value)}
-            className="w-28 rounded border border-white/20 bg-transparent px-3 py-2 text-white"
+            className="w-28 rounded border border-slate-300 bg-white px-3 py-2 text-slate-900"
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm text-white/70">Service</label>
+          <label className="mb-1 block text-sm text-slate-600">Service</label>
           <select
             value={serviceType}
             onChange={e => setServiceType(e.target.value)}
-            className="rounded border border-white/20 bg-transparent px-3 py-2 text-white"
+            className="rounded border border-slate-300 bg-white px-3 py-2 text-slate-900"
           >
-            <option value="" className="bg-dark-card text-white">All</option>
-            <option value="INTERNET" className="bg-dark-card text-white">INTERNET</option>
-            <option value="WATER" className="bg-dark-card text-white">WATER</option>
-            <option value="RENT" className="bg-dark-card text-white">RENT</option>
+            <option value="" className="bg-white text-slate-900">All</option>
+            <option value="INTERNET" className="bg-white text-slate-900">INTERNET</option>
+            <option value="WATER" className="bg-white text-slate-900">WATER</option>
+            <option value="RENT" className="bg-white text-slate-900">RENT</option>
           </select>
         </div>
         <Button onClick={refresh} disabled={loading}>
@@ -97,7 +97,7 @@ export function PaymentHistory() {
 
       <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
-        <thead className="text-white/50">
+        <thead className="text-slate-500">
           <tr>
             <th className="pb-2">Client</th>
             <th className="pb-2">Service</th>
@@ -109,14 +109,14 @@ export function PaymentHistory() {
         </thead>
         <tbody>
           {rows.map(r => (
-            <tr key={r.id} className="border-t border-white/10">
-              <td className="py-2 text-white">{r.client.name}</td>
-              <td className="py-2 text-white/70">{r.serviceType}</td>
-              <td className="py-2 text-white/70">
+            <tr key={r.id} className="border-t border-slate-100">
+              <td className="py-2 text-slate-900">{r.client.name}</td>
+              <td className="py-2 text-slate-600">{r.serviceType}</td>
+              <td className="py-2 text-slate-600">
                 {monthName(r.month)} {r.year}
               </td>
-              <td className="py-2 text-white/70">{fmtXaf(r.amount)}</td>
-              <td className="py-2 text-white/70">
+              <td className="py-2 text-slate-600">{fmtXaf(r.amount)}</td>
+              <td className="py-2 text-slate-600">
                 {r.payment ? new Date(r.payment.paymentDate).toISOString().slice(0, 10) : '—'}
               </td>
               <td className="py-2">
@@ -128,7 +128,7 @@ export function PaymentHistory() {
           ))}
           {rows.length === 0 && (
             <tr>
-              <td colSpan={6} className="py-4 text-center text-white/40">
+              <td colSpan={6} className="py-4 text-center text-slate-400">
                 {loading ? 'Loading…' : 'No payments found.'}
               </td>
             </tr>

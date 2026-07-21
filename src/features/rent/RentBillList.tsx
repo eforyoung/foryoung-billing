@@ -9,7 +9,7 @@ export async function RentBillList() {
     <Card title="Rent Bills">
       <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
-        <thead className="text-white/50">
+        <thead className="text-slate-500">
           <tr>
             <th className="pb-2">Client</th>
             <th className="pb-2">Period</th>
@@ -21,14 +21,14 @@ export async function RentBillList() {
         </thead>
         <tbody>
           {bills.map(b => (
-            <tr key={b.id} className="border-t border-white/10">
-              <td className="py-2 text-white">{b.client.name}</td>
-              <td className="py-2 text-white/70">
+            <tr key={b.id} className="border-t border-slate-100">
+              <td className="py-2 text-slate-900">{b.client.name}</td>
+              <td className="py-2 text-slate-600">
                 {monthName(b.month)} {b.year}
                 {b.monthsCount > 1 ? ` (${b.monthsCount} months)` : ''}
               </td>
-              <td className="py-2 text-white/70">{fmtXaf(Number(b.amount))}</td>
-              <td className="py-2 text-white/70">{b.dueDate ? new Date(b.dueDate).toLocaleDateString('en-GB') : '—'}</td>
+              <td className="py-2 text-slate-600">{fmtXaf(Number(b.amount))}</td>
+              <td className="py-2 text-slate-600">{b.dueDate ? new Date(b.dueDate).toLocaleDateString('en-GB') : '—'}</td>
               <td className="py-2">
                 <Badge color={b.isPaid ? 'green' : 'amber'}>{b.isPaid ? 'Paid' : 'Unpaid'}</Badge>
               </td>

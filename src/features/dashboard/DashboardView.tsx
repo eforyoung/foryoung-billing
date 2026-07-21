@@ -17,8 +17,8 @@ export async function DashboardView() {
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         {cards.map(c => (
           <Card key={c.label}>
-            <p className="text-xs text-white/50">{c.label}</p>
-            <p className="mt-1 text-2xl font-bold text-white">{c.value}</p>
+            <p className="text-xs text-slate-500">{c.label}</p>
+            <p className="mt-1 text-2xl font-bold text-slate-900">{c.value}</p>
           </Card>
         ))}
       </div>
@@ -26,7 +26,7 @@ export async function DashboardView() {
       <Card title="Recent Unpaid Bills">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="text-white/50">
+            <thead className="text-slate-500">
               <tr>
                 <th className="pb-2">Client</th>
                 <th className="pb-2">Service</th>
@@ -36,20 +36,20 @@ export async function DashboardView() {
             </thead>
             <tbody>
               {summary.recentUnpaid.map(b => (
-                <tr key={b.id} className="border-t border-white/10">
-                  <td className="py-2 text-white">{b.clientName}</td>
+                <tr key={b.id} className="border-t border-slate-100">
+                  <td className="py-2 text-slate-900">{b.clientName}</td>
                   <td className="py-2">
                     <Badge color="blue">{b.serviceType}</Badge>
                   </td>
-                  <td className="py-2 text-white/70">
+                  <td className="py-2 text-slate-600">
                     {monthName(b.month)} {b.year}
                   </td>
-                  <td className="py-2 text-white/70">{fmtXaf(b.amount)}</td>
+                  <td className="py-2 text-slate-600">{fmtXaf(b.amount)}</td>
                 </tr>
               ))}
               {summary.recentUnpaid.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="py-4 text-center text-white/40">
+                  <td colSpan={4} className="py-4 text-center text-slate-400">
                     No unpaid bills.
                   </td>
                 </tr>

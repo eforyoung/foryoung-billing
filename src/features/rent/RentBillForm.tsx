@@ -47,16 +47,16 @@ export function RentBillForm() {
     <Card title="Generate Rent Bill">
       <div className="space-y-3">
         <div>
-          <label className="mb-1 block text-sm text-white/70">Client</label>
+          <label className="mb-1 block text-sm text-slate-600">Client</label>
           <select
             value={clientId}
             onChange={e => setClientId(e.target.value)}
             disabled={clientsLoading}
-            className="w-full rounded border border-white/20 bg-transparent px-3 py-2 text-white"
+            className="w-full rounded border border-slate-300 bg-white px-3 py-2 text-slate-900"
           >
-            <option value="" className="bg-dark-card text-white">{clientsLoading ? 'Loading clients…' : 'Select client…'}</option>
+            <option value="" className="bg-white text-slate-900">{clientsLoading ? 'Loading clients…' : 'Select client…'}</option>
             {clients.map(c => (
-              <option key={c.id} value={c.id} className="bg-dark-card text-white">
+              <option key={c.id} value={c.id} className="bg-white text-slate-900">
                 {c.name}{c.unit ? ` — ${c.unit}` : ''}
               </option>
             ))}
@@ -71,8 +71,8 @@ export function RentBillForm() {
           <Input label="Number of months" type="number" min={1} value={monthsCount} onChange={e => setMonthsCount(Number(e.target.value))} />
           <Input label="Due date" type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} />
         </div>
-        <p className="text-sm text-white/70">
-          Total: <span className="font-semibold text-white">{fmtXaf(computeRentTotal(amount, monthsCount))}</span> (
+        <p className="text-sm text-slate-600">
+          Total: <span className="font-semibold text-slate-900">{fmtXaf(computeRentTotal(amount, monthsCount))}</span> (
           {monthsCount} month{monthsCount > 1 ? 's' : ''})
         </p>
         {message && <p className="text-sm text-teal">{message}</p>}

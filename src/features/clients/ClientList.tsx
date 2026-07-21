@@ -60,7 +60,12 @@ export function ClientList({ clients }: { clients: ClientWithServices[] }) {
         </tbody>
       </table>
       </div>
-      <ClientForm open={formOpen} onClose={() => setFormOpen(false)} editing={editing} />
+      <ClientForm
+        key={`${formOpen}-${editing?.id ?? 'new'}`}
+        open={formOpen}
+        onClose={() => setFormOpen(false)}
+        editing={editing}
+      />
     </Card>
   )
 }

@@ -134,7 +134,7 @@ export function WaterReadingForm() {
           </div>
         )}
 
-        {message && <p className="text-sm text-teal">{message}</p>}
+        {message && <p className="text-sm text-slate-600">{message}</p>}
         <Button onClick={handleGenerate} disabled={!clientId || !breakdown}>
           Generate Bill
         </Button>

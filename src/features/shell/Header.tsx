@@ -10,7 +10,7 @@ export function Header({ userName }: { userName: string }) {
         <span className="hidden text-sm text-white/70 sm:inline">{userName}</span>
         <button
           onClick={() => signOut({ callbackUrl: '/login' })}
-          className="text-sm text-white/50 transition-colors hover:text-teal"
+          className="text-sm text-white/50 transition-colors hover:text-white"
         >
           Sign out
         </button>

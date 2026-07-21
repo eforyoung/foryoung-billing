@@ -75,7 +75,7 @@ export function RentBillForm() {
           Total: <span className="font-semibold text-slate-900">{fmtXaf(computeRentTotal(amount, monthsCount))}</span> (
           {monthsCount} month{monthsCount > 1 ? 's' : ''})
         </p>
-        {message && <p className="text-sm text-teal">{message}</p>}
+        {message && <p className="text-sm text-slate-600">{message}</p>}
         <Button onClick={handleGenerate} disabled={!clientId}>
           Generate Bill
         </Button>

@@ -19,7 +19,7 @@ export function TermsEditor({ initialText }: { initialText: string }) {
   return (
     <Card title="Terms & Conditions">
       <Textarea value={text} onChange={e => setText(e.target.value)} rows={8} />
-      {message && <p className="mt-2 text-sm text-teal">{message}</p>}
+      {message && <p className="mt-2 text-sm text-slate-600">{message}</p>}
       <div className="mt-3">
         <Button onClick={handleSave} disabled={saving}>
           {saving ? 'Saving…' : 'Save'}

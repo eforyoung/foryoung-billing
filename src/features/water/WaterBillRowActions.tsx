@@ -44,7 +44,7 @@ export function WaterBillRowActions({ bill }: WaterBillRowActionsProps) {
 
   return (
     <>
-      <button className="text-teal hover:underline" onClick={() => setOpen(true)}>
+      <button className="text-navy hover:underline" onClick={() => setOpen(true)}>
         Edit
       </button>
       <Modal open={open} onClose={() => setOpen(false)} title="Edit Water Bill">

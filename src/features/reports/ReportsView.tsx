@@ -117,7 +117,7 @@ export function ReportsView() {
             </div>
 
             <div className="border-t border-slate-200 pt-4">
-              <p className="font-semibold text-teal">Net Profit</p>
+              <p className="font-semibold text-navy">Net Profit</p>
               <p className="text-lg font-bold text-slate-900">{fmtXaf(report.netProfit)}</p>
             </div>
           </div>
@@ -136,21 +136,21 @@ export function ReportsView() {
 
             <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="text-slate-500">
-                <tr>
-                  <th className="pb-2">Label</th>
-                  <th className="pb-2">Amount</th>
-                  <th className="pb-2">Notes</th>
-                  <th className="pb-2">Actions</th>
+              <thead>
+                <tr className="bg-navy">
+                  <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Label</th>
+                  <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Amount</th>
+                  <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Notes</th>
+                  <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {report.variableCosts.map(v => (
                   <tr key={v.id} className="border-t border-slate-100">
-                    <td className="py-2 text-slate-900">{v.label}</td>
-                    <td className="py-2 text-slate-600">{fmtXaf(v.amount)}</td>
-                    <td className="py-2 text-slate-600">{v.notes || '—'}</td>
-                    <td className="py-2">
+                    <td className="px-3 py-2 text-slate-900">{v.label}</td>
+                    <td className="px-3 py-2 text-slate-600">{fmtXaf(v.amount)}</td>
+                    <td className="px-3 py-2 text-slate-600">{v.notes || '—'}</td>
+                    <td className="px-3 py-2">
                       <button className="text-red-600 hover:underline" onClick={() => handleDeleteVariableCost(v.id)}>
                         Delete
                       </button>

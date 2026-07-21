@@ -26,25 +26,25 @@ export async function DashboardView() {
       <Card title="Recent Unpaid Bills">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="text-slate-500">
-              <tr>
-                <th className="pb-2">Client</th>
-                <th className="pb-2">Service</th>
-                <th className="pb-2">Period</th>
-                <th className="pb-2">Amount</th>
+            <thead>
+              <tr className="bg-navy">
+                <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Client</th>
+                <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Service</th>
+                <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Period</th>
+                <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Amount</th>
               </tr>
             </thead>
             <tbody>
               {summary.recentUnpaid.map(b => (
                 <tr key={b.id} className="border-t border-slate-100">
-                  <td className="py-2 text-slate-900">{b.clientName}</td>
-                  <td className="py-2">
+                  <td className="px-3 py-2 text-slate-900">{b.clientName}</td>
+                  <td className="px-3 py-2">
                     <Badge color="blue">{b.serviceType}</Badge>
                   </td>
-                  <td className="py-2 text-slate-600">
+                  <td className="px-3 py-2 text-slate-600">
                     {monthName(b.month)} {b.year}
                   </td>
-                  <td className="py-2 text-slate-600">{fmtXaf(b.amount)}</td>
+                  <td className="px-3 py-2 text-slate-600">{fmtXaf(b.amount)}</td>
                 </tr>
               ))}
               {summary.recentUnpaid.length === 0 && (

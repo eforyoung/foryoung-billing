@@ -32,8 +32,8 @@ export function Sidebar({ isAdmin }: { isAdmin: boolean }) {
           className={cn(
             'flex items-center gap-2 rounded px-3 py-2 text-sm text-white/70 transition-colors',
             pathname === item.href
-              ? 'bg-navy font-semibold text-white hover:bg-navy hover:text-white'
-              : 'hover:bg-navy hover:text-teal',
+              ? 'bg-[#2d4a7a] font-semibold text-white'
+              : 'hover:bg-[#253e66] hover:text-white',
           )}
         >
           <span aria-hidden="true">{item.icon}</span>

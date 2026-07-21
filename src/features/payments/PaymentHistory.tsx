@@ -103,29 +103,29 @@ export function PaymentHistory() {
 
       <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
-        <thead className="text-slate-500">
-          <tr>
-            <th className="pb-2">Client</th>
-            <th className="pb-2">Service</th>
-            <th className="pb-2">Period</th>
-            <th className="pb-2">Amount</th>
-            <th className="pb-2">Paid Date</th>
-            <th className="pb-2">Actions</th>
+        <thead>
+          <tr className="bg-navy">
+            <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Client</th>
+            <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Service</th>
+            <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Period</th>
+            <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Amount</th>
+            <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Paid Date</th>
+            <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Actions</th>
           </tr>
         </thead>
         <tbody>
           {rows.map(r => (
             <tr key={r.id} className="border-t border-slate-100">
-              <td className="py-2 text-slate-900">{r.client.name}</td>
-              <td className="py-2 text-slate-600">{r.serviceType}</td>
-              <td className="py-2 text-slate-600">
+              <td className="px-3 py-2 text-slate-900">{r.client.name}</td>
+              <td className="px-3 py-2 text-slate-600">{r.serviceType}</td>
+              <td className="px-3 py-2 text-slate-600">
                 {monthName(r.month)} {r.year}
               </td>
-              <td className="py-2 text-slate-600">{fmtXaf(r.amount)}</td>
-              <td className="py-2 text-slate-600">
+              <td className="px-3 py-2 text-slate-600">{fmtXaf(r.amount)}</td>
+              <td className="px-3 py-2 text-slate-600">
                 {r.payment ? new Date(r.payment.paymentDate).toISOString().slice(0, 10) : '—'}
               </td>
-              <td className="py-2">
+              <td className="px-3 py-2">
                 <Button size="sm" onClick={() => handleDownload(r)} disabled={!r.payment}>
                   Download Receipt
                 </Button>

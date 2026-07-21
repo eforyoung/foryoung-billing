@@ -12,11 +12,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
 ) {
   return (
     <div>
-      {label && <label className="mb-1 block text-sm text-slate-600">{label}</label>}
+      {label && <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-slate-600">{label}</label>}
       <input
         ref={ref}
         className={cn(
-          'w-full rounded border border-slate-300 bg-white px-3 py-2 text-slate-900 placeholder:text-slate-400',
+          'w-full rounded border border-slate-300 bg-white px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/10',
           error && 'border-red-500',
           className,
         )}
@@ -38,11 +38,11 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function 
 ) {
   return (
     <div>
-      {label && <label className="mb-1 block text-sm text-slate-600">{label}</label>}
+      {label && <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-slate-600">{label}</label>}
       <textarea
         ref={ref}
         className={cn(
-          'w-full rounded border border-slate-300 bg-white px-3 py-2 text-slate-900 placeholder:text-slate-400',
+          'w-full rounded border border-slate-300 bg-white px-3 py-2 text-slate-900 placeholder:text-slate-400 focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/10',
           error && 'border-red-500',
           className,
         )}

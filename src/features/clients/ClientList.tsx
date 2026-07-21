@@ -27,28 +27,28 @@ export function ClientList({ clients }: { clients: ClientWithServices[] }) {
       </div>
       <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
-        <thead className="text-slate-500">
-          <tr>
-            <th className="pb-2">Name</th>
-            <th className="pb-2">Phone</th>
-            <th className="pb-2">Unit</th>
-            <th className="pb-2">Services</th>
-            <th className="pb-2">Status</th>
-            <th className="pb-2">Actions</th>
+        <thead>
+          <tr className="bg-navy">
+            <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Name</th>
+            <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Phone</th>
+            <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Unit</th>
+            <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Services</th>
+            <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Status</th>
+            <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Actions</th>
           </tr>
         </thead>
         <tbody>
           {clients.map(c => (
             <tr key={c.id} className="border-t border-slate-100">
-              <td className="py-2 text-slate-900">{c.name}</td>
-              <td className="py-2 text-slate-600">{c.phone}</td>
-              <td className="py-2 text-slate-600">{c.unit || '—'}</td>
-              <td className="py-2 text-slate-600">{c.services.map(s => s.type).join(', ') || '—'}</td>
-              <td className="py-2">
+              <td className="px-3 py-2 text-slate-900">{c.name}</td>
+              <td className="px-3 py-2 text-slate-600">{c.phone}</td>
+              <td className="px-3 py-2 text-slate-600">{c.unit || '—'}</td>
+              <td className="px-3 py-2 text-slate-600">{c.services.map(s => s.type).join(', ') || '—'}</td>
+              <td className="px-3 py-2">
                 <Badge color={c.isActive ? 'green' : 'grey'}>{c.isActive ? 'Active' : 'Inactive'}</Badge>
               </td>
-              <td className="py-2 space-x-2">
-                <button className="text-teal hover:underline" onClick={() => openEdit(c)}>
+              <td className="px-3 py-2 space-x-2">
+                <button className="text-navy hover:underline" onClick={() => openEdit(c)}>
                   Edit
                 </button>
                 <button className="text-slate-500 hover:underline" onClick={() => toggleClientActive(c.id)}>

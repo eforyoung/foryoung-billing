@@ -24,37 +24,39 @@ export async function DashboardView() {
       </div>
 
       <Card title="Recent Unpaid Bills">
-        <table className="w-full text-left text-sm">
-          <thead className="text-white/50">
-            <tr>
-              <th className="pb-2">Client</th>
-              <th className="pb-2">Service</th>
-              <th className="pb-2">Period</th>
-              <th className="pb-2">Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            {summary.recentUnpaid.map(b => (
-              <tr key={b.id} className="border-t border-white/10">
-                <td className="py-2 text-white">{b.clientName}</td>
-                <td className="py-2">
-                  <Badge color="blue">{b.serviceType}</Badge>
-                </td>
-                <td className="py-2 text-white/70">
-                  {monthName(b.month)} {b.year}
-                </td>
-                <td className="py-2 text-white/70">{fmtXaf(b.amount)}</td>
-              </tr>
-            ))}
-            {summary.recentUnpaid.length === 0 && (
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="text-white/50">
               <tr>
-                <td colSpan={4} className="py-4 text-center text-white/40">
-                  No unpaid bills.
-                </td>
+                <th className="pb-2">Client</th>
+                <th className="pb-2">Service</th>
+                <th className="pb-2">Period</th>
+                <th className="pb-2">Amount</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {summary.recentUnpaid.map(b => (
+                <tr key={b.id} className="border-t border-white/10">
+                  <td className="py-2 text-white">{b.clientName}</td>
+                  <td className="py-2">
+                    <Badge color="blue">{b.serviceType}</Badge>
+                  </td>
+                  <td className="py-2 text-white/70">
+                    {monthName(b.month)} {b.year}
+                  </td>
+                  <td className="py-2 text-white/70">{fmtXaf(b.amount)}</td>
+                </tr>
+              ))}
+              {summary.recentUnpaid.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="py-4 text-center text-white/40">
+                    No unpaid bills.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </Card>
     </div>
   )

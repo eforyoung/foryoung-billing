@@ -15,6 +15,7 @@ export async function InternetBillList() {
             <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Period</th>
             <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Amount</th>
             <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Due Date</th>
+            <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Payment Date</th>
             <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Status</th>
             <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Actions</th>
           </tr>
@@ -29,6 +30,7 @@ export async function InternetBillList() {
               </td>
               <td className="px-3 py-2 text-slate-600">{fmtXaf(Number(b.amount))}</td>
               <td className="px-3 py-2 text-slate-600">{b.dueDate ? new Date(b.dueDate).toLocaleDateString('en-GB') : '—'}</td>
+              <td className="px-3 py-2 text-slate-600">{b.paidDate ? new Date(b.paidDate).toLocaleDateString('en-GB') : '—'}</td>
               <td className="px-3 py-2">
                 <Badge color={b.isPaid ? 'green' : 'amber'}>{b.isPaid ? 'Paid' : 'Unpaid'}</Badge>
               </td>

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 
@@ -28,10 +27,10 @@ export function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4 rounded-lg border border-white/10 bg-dark-card p-8">
-      <div className="flex justify-center">
-        <Image src="/logo.png" alt="4Young Inc." width={132} height={106} />
+      <div className="text-center">
+        <h1 className="text-xl font-bold tracking-wide text-white">THE FORYOUNG&apos;S</h1>
+        <p className="mt-1 text-xs text-white/50">Bill Payment Platform</p>
       </div>
-      <h1 className="text-xl font-bold text-white">Foryoung&apos;s Billing</h1>
       {error && <p className="text-sm text-red-400">{error}</p>}
       <div>
         <label className="mb-1 block text-sm text-white/70">Email</label>

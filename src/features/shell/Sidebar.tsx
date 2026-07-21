@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
@@ -22,8 +21,9 @@ export function Sidebar({ isAdmin }: { isAdmin: boolean }) {
 
   return (
     <nav className="hidden w-56 flex-col gap-1 border-r border-white/10 bg-dark-card p-4 md:flex">
-      <div className="mb-4 flex justify-center">
-        <Image src="/logo.png" alt="4Young Inc." width={176} height={166} priority />
+      <div className="mb-3 border-b border-white/10 px-1 pb-3">
+        <h1 className="text-base font-bold tracking-wide text-white">THE FORYOUNG&apos;S</h1>
+        <p className="mt-0.5 text-[11px] text-white/50">Bill Payment Platform</p>
       </div>
       {items.map(item => (
         <Link

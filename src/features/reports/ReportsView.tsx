@@ -52,7 +52,7 @@ export function ReportsView() {
     <div className="space-y-6">
       <Card>
         <div className="mb-4 flex items-end justify-between">
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             <Input label="Month" type="number" min={1} max={12} value={month} onChange={e => setMonth(Number(e.target.value))} />
             <Input label="Year" type="number" value={year} onChange={e => setYear(Number(e.target.value))} />
           </div>
@@ -68,7 +68,7 @@ export function ReportsView() {
 
         {report && tab === 'pnl' && (
           <div className="space-y-4">
-            <div className="grid grid-cols-3 gap-4 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
               <div>
                 <p className="text-white/50">Internet Collected</p>
                 <p className="text-white">{fmtXaf(report.internetCollected)}</p>
@@ -83,7 +83,7 @@ export function ReportsView() {
               </div>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               <Input
                 label="Internet provider cost"
                 type="number"
@@ -101,7 +101,7 @@ export function ReportsView() {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 border-t border-white/10 pt-4 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-white/10 pt-4 text-sm">
               <div>
                 <p className="text-white/50">Internet Profit</p>
                 <p className="text-white">{fmtXaf(report.internetProfit)}</p>
@@ -125,7 +125,7 @@ export function ReportsView() {
 
         {report && tab === 'variable' && (
           <div className="space-y-4">
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               <Input label="Label" value={newLabel} onChange={e => setNewLabel(e.target.value)} placeholder="e.g. House Repairs" />
               <Input label="Amount" type="number" value={newAmount} onChange={e => setNewAmount(Number(e.target.value))} />
               <Input label="Notes (optional)" value={newNotes} onChange={e => setNewNotes(e.target.value)} />
@@ -134,6 +134,7 @@ export function ReportsView() {
               </div>
             </div>
 
+            <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="text-white/50">
                 <tr>
@@ -165,6 +166,7 @@ export function ReportsView() {
                 )}
               </tbody>
             </table>
+            </div>
 
             <div className="flex justify-between border-t border-white/10 pt-3 text-sm font-semibold">
               <span className="text-white/70">Total Variable Costs</span>

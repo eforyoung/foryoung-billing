@@ -62,11 +62,11 @@ export function RentBillForm() {
             ))}
           </select>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <Input label="Month" type="number" min={1} max={12} value={month} onChange={e => setMonth(Number(e.target.value))} />
           <Input label="Year" type="number" value={year} onChange={e => setYear(Number(e.target.value))} />
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <Input label="Amount per month" type="number" value={amount} onChange={e => setAmount(Number(e.target.value))} />
           <Input label="Number of months" type="number" min={1} value={monthsCount} onChange={e => setMonthsCount(Number(e.target.value))} />
           <Input label="Due date" type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} />

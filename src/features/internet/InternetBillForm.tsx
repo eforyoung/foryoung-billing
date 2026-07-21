@@ -67,7 +67,7 @@ export function InternetBillForm() {
             ))}
           </select>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <Input label="Month" type="number" min={1} max={12} value={month} onChange={e => setMonth(Number(e.target.value))} />
           <Input label="Year" type="number" value={year} onChange={e => setYear(Number(e.target.value))} />
           <Input

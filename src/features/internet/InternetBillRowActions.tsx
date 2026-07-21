@@ -42,7 +42,7 @@ export function InternetBillRowActions({ bill }: InternetBillRowActionsProps) {
       <Modal open={open} onClose={() => setOpen(false)} title="Edit Internet Bill">
         <div className="space-y-3">
           {error && <p className="text-sm text-red-400">{error}</p>}
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             <Input label="Month" type="number" min={1} max={12} value={month} onChange={e => setMonth(Number(e.target.value))} />
             <Input label="Year" type="number" value={year} onChange={e => setYear(Number(e.target.value))} />
           </div>

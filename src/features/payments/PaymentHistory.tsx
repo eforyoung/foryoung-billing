@@ -12,8 +12,11 @@ interface PaymentRow {
   serviceType: 'INTERNET' | 'WATER' | 'RENT'
   month: number
   year: number
+  monthsCount: number
   amount: number
-  client: { name: string; phone: string }
+  dueDate: Date | string | null
+  client: { name: string; phone: string; unit: string | null }
+  reading: { consumption: number; consumptionCost: number } | null
   payment: { amountPaid: number; paymentDate: Date | string; notes: string | null } | null
 }
 
@@ -43,14 +46,17 @@ export function PaymentHistory() {
   function handleDownload(row: PaymentRow) {
     if (!row.payment) return
     generateReceiptPDF({
-      receiptNumber: `${row.id.slice(0, 8).toUpperCase()}`,
-      clientName: row.client.name,
-      clientPhone: row.client.phone,
+      id: row.id,
       serviceType: row.serviceType,
-      periodLabel: `${monthName(row.month)} ${row.year}`,
+      month: row.month,
+      year: row.year,
+      monthsCount: row.monthsCount,
       amount: row.payment.amountPaid,
       paidDate: new Date(row.payment.paymentDate).toISOString().slice(0, 10),
-      notes: row.payment.notes ?? undefined,
+      notes: row.payment.notes,
+      dueDate: row.dueDate ? new Date(row.dueDate).toISOString().slice(0, 10) : null,
+      client: row.client,
+      reading: row.reading,
     })
   }
 

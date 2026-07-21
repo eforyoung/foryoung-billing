@@ -1,143 +1,188 @@
 import jsPDF from 'jspdf'
+import { monthName } from '@/lib/utils'
 
-export interface ReceiptData {
-  receiptNumber: string
-  clientName: string
-  clientPhone: string
+export interface ReceiptWaterReading {
+  consumption: number
+  consumptionCost: number
+}
+
+export interface ReceiptBillInput {
+  id: string
   serviceType: 'INTERNET' | 'WATER' | 'RENT'
-  periodLabel: string
+  month: number
+  year: number
+  monthsCount: number
   amount: number
   paidDate: string
-  notes?: string
+  notes?: string | null
+  dueDate?: string | null
+  client: { name: string; unit: string | null; phone: string }
+  reading?: ReceiptWaterReading | null
 }
 
 function fmt(n: number): string {
   return n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
 }
 
-const SERVICE_LABELS: Record<ReceiptData['serviceType'], string> = {
-  INTERNET: 'Internet Service',
-  WATER: 'Water Service',
+const SERVICE_LABELS: Record<ReceiptBillInput['serviceType'], string> = {
+  INTERNET: 'Internet',
+  WATER: 'Water',
   RENT: 'Rent',
 }
 
-function loadLogo(): Promise<HTMLImageElement | null> {
-  return new Promise(resolve => {
-    const img = new Image()
-    img.crossOrigin = 'anonymous'
-    img.onload = () => resolve(img)
-    img.onerror = () => resolve(null) // silently skip if logo fails to load
-    img.src = '/logo.png'
-  })
+function formatDate(iso: string): string {
+  const d = new Date(iso)
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' })
 }
 
-export async function generateReceiptPDF(data: ReceiptData): Promise<void> {
-  const logo = await loadLogo()
+function receiptNumber(bill: ReceiptBillInput): string {
+  let hash = 0
+  for (let i = 0; i < bill.id.length; i++) {
+    hash = (hash + bill.id.charCodeAt(i) * (i + 1)) % 10000
+  }
+  return `RCP-${String(hash).padStart(4, '0')}-${bill.year}`
+}
 
+function buildDetailLines(bill: ReceiptBillInput): { label: string; value: string }[] {
+  if (bill.serviceType === 'INTERNET') {
+    return [
+      { label: 'Rate', value: '10,000 F/mo' },
+      { label: 'Months', value: String(bill.monthsCount || 1) },
+    ]
+  }
+  if (bill.serviceType === 'WATER') {
+    const r = bill.reading
+    if (!r) return []
+    if (r.consumption === 0) {
+      return [
+        { label: 'Consumption', value: '0 m³' },
+        { label: 'Default Tax — Base', value: '780 F' },
+        { label: 'Default Tax — Surcharge', value: '150 F' },
+        { label: 'Electricity Fee (flat)', value: '1,000 F' },
+        { label: 'Pump Service Fee (flat)', value: '2,000 F' },
+      ]
+    }
+    return [
+      { label: 'Consumption', value: `${r.consumption.toFixed(1)} m³` },
+      { label: 'Rate', value: '700 F/m³' },
+      { label: 'Consumption Cost', value: fmt(r.consumptionCost) },
+      { label: 'Electricity Fee (flat)', value: '1,000 F' },
+      { label: 'Pump Service Fee (flat)', value: '2,000 F' },
+    ]
+  }
+  // RENT
+  const months = bill.monthsCount || 1
+  const perMonth = months > 0 ? bill.amount / months : bill.amount
+  return [
+    { label: 'Rate', value: `${fmt(perMonth)}/mo` },
+    { label: 'Months', value: String(months) },
+    { label: 'Due Date', value: bill.dueDate ? formatDate(bill.dueDate) : '—' },
+  ]
+}
+
+export function generateReceiptPDF(bill: ReceiptBillInput): void {
   const pdf = new jsPDF('p', 'mm', 'a4')
   const W = 210
   const M = 20
   const rightX = W - M
+  const centerX = W / 2
   let y = M
-  let textX = M
 
-  if (logo && logo.width > 0) {
-    const logoW = 20
-    const logoH = (logo.height / logo.width) * logoW
-    pdf.addImage(logo, 'PNG', M, y - 4, logoW, logoH)
-    textX = M + logoW + 5
-  }
-
+  // Header
   pdf.setFont('helvetica', 'bold')
-  pdf.setFontSize(16)
+  pdf.setFontSize(18)
   pdf.setTextColor('#1e3a5f')
-  pdf.text('4YOUNG INC.', textX, y)
-
-  pdf.setFont('helvetica', 'normal')
-  pdf.setFontSize(8)
-  pdf.setTextColor('#64748b')
-  pdf.text('FOR THE FUTURE', textX, y + 6)
-
-  pdf.setFont('helvetica', 'bold')
-  pdf.setFontSize(13)
-  pdf.setTextColor('#0D9488')
-  pdf.text('PAYMENT RECEIPT', rightX, y, { align: 'right' })
-  pdf.setFont('helvetica', 'normal')
-  pdf.setFontSize(9)
-  pdf.setTextColor('#64748b')
-  pdf.text(data.receiptNumber, rightX, y + 6, { align: 'right' })
-
-  y += 18
-  pdf.setDrawColor('#0D9488')
-  pdf.setLineWidth(0.8)
-  pdf.line(M, y, rightX, y)
-  y += 10
-
-  pdf.setFont('helvetica', 'bold')
-  pdf.setFontSize(9)
-  pdf.setTextColor('#0D9488')
-  pdf.text('RECEIVED FROM', M, y)
+  pdf.text("THE FORYOUNG'S", centerX, y, { align: 'center' })
   y += 6
+
+  pdf.setFont('helvetica', 'normal')
+  pdf.setFontSize(9)
+  pdf.setTextColor('#64748b')
+  pdf.text('BILL PAYMENT PLATFORM', centerX, y, { align: 'center' })
+  y += 6
+
   pdf.setFont('helvetica', 'bold')
   pdf.setFontSize(11)
-  pdf.setTextColor('#1e293b')
-  pdf.text(data.clientName, M, y)
-  y += 5
-  pdf.setFont('helvetica', 'normal')
-  pdf.setFontSize(9)
-  pdf.setTextColor('#475569')
-  pdf.text(data.clientPhone, M, y)
-
-  y += 14
-  pdf.setFillColor('#f8fafc')
-  pdf.setDrawColor('#1e3a5f')
-  pdf.setLineWidth(0.4)
-  pdf.roundedRect(M, y, rightX - M, 40, 2, 2, 'FD')
-
-  let ry = y + 10
-  pdf.setFont('helvetica', 'normal')
-  pdf.setFontSize(9)
-  pdf.setTextColor('#475569')
-  pdf.text('Service', M + 6, ry)
-  pdf.setTextColor('#1e293b')
-  pdf.text(SERVICE_LABELS[data.serviceType], rightX - 6, ry, { align: 'right' })
-
-  ry += 8
-  pdf.setTextColor('#475569')
-  pdf.text('Period', M + 6, ry)
-  pdf.setTextColor('#1e293b')
-  pdf.text(data.periodLabel, rightX - 6, ry, { align: 'right' })
-
-  ry += 8
-  pdf.setTextColor('#475569')
-  pdf.text('Payment Date', M + 6, ry)
-  pdf.setTextColor('#1e293b')
-  pdf.text(data.paidDate, rightX - 6, ry, { align: 'right' })
-
-  ry += 10
-  pdf.setFont('helvetica', 'bold')
-  pdf.setFontSize(12)
   pdf.setTextColor('#1e3a5f')
-  pdf.text('AMOUNT PAID', M + 6, ry)
-  pdf.text(`${fmt(data.amount)} XAF`, rightX - 6, ry, { align: 'right' })
+  pdf.text(receiptNumber(bill), centerX, y, { align: 'center' })
+  y += 4
 
-  y += 50
+  pdf.setDrawColor('#1e3a5f')
+  pdf.setLineWidth(0.6)
+  pdf.line(M, y, rightX, y)
+  y += 8
 
-  if (data.notes) {
-    pdf.setFont('helvetica', 'italic')
-    pdf.setFontSize(8)
+  function row(label: string, value: string, opts?: { bold?: boolean; color?: string }) {
+    pdf.setFont('helvetica', 'normal')
+    pdf.setFontSize(10)
     pdf.setTextColor('#64748b')
-    pdf.text(`Notes: ${data.notes}`, M, y)
-    y += 8
+    pdf.text(label, M, y)
+    pdf.setFont('helvetica', opts?.bold ? 'bold' : 'normal')
+    pdf.setTextColor(opts?.color ?? '#1e293b')
+    pdf.text(value, rightX, y, { align: 'right' })
+    y += 6
   }
 
-  pdf.setDrawColor('#cbd5e1')
+  function dashedDivider() {
+    pdf.setDrawColor('#cbd5e1')
+    pdf.setLineWidth(0.2)
+    pdf.setLineDashPattern([1, 1], 0)
+    pdf.line(M, y, rightX, y)
+    pdf.setLineDashPattern([], 0)
+    y += 6
+  }
+
+  row('Client', bill.client.name, { bold: true })
+  row('Unit', bill.client.unit || '—')
+  row('Phone', bill.client.phone)
+
+  dashedDivider()
+
+  row('Service', SERVICE_LABELS[bill.serviceType])
+  row('Period', `${monthName(bill.month)} ${bill.year}`)
+  for (const line of buildDetailLines(bill)) {
+    row(line.label, line.value)
+  }
+  if (bill.notes) {
+    pdf.setFont('helvetica', 'italic')
+    pdf.setFontSize(9)
+    pdf.setTextColor('#475569')
+    pdf.text('Notes', M, y)
+    const noteLines = pdf.splitTextToSize(bill.notes, 90)
+    pdf.text(noteLines, rightX, y, { align: 'right' })
+    y += 6 * noteLines.length
+  }
+
+  dashedDivider()
+
+  pdf.setDrawColor('#1e3a5f')
+  pdf.setLineWidth(0.6)
+  pdf.line(M, y - 3, rightX, y - 3)
+  y += 2
+  pdf.setFont('helvetica', 'bold')
+  pdf.setFontSize(14)
+  pdf.setTextColor('#1e3a5f')
+  pdf.text('Amount Paid', M, y)
+  pdf.text(`${fmt(bill.amount)} XAF`, rightX, y, { align: 'right' })
+  y += 8
+
+  row('Payment Date', formatDate(bill.paidDate))
+  row('Status', 'Paid', { color: '#059669', bold: true })
+
+  dashedDivider()
+
+  pdf.setFont('helvetica', 'italic')
+  pdf.setFontSize(9)
+  pdf.setTextColor('#94a3b8')
+  pdf.text('Thank you for your payment!', centerX, y, { align: 'center' })
+
+  pdf.setDrawColor('#e2e8f0')
   pdf.setLineWidth(0.15)
   pdf.line(M, 287, rightX, 287)
   pdf.setFont('helvetica', 'normal')
   pdf.setFontSize(7)
   pdf.setTextColor('#94a3b8')
-  pdf.text('4YOUNG INC.', M, 292)
+  pdf.text("Generated by THE FORYOUNG'S Bill Payment Platform", centerX, 292, { align: 'center' })
 
-  pdf.save(`Receipt-${data.receiptNumber.replace(/\//g, '-')}.pdf`)
+  pdf.save(`Receipt-${receiptNumber(bill).replace(/\//g, '-')}.pdf`)
 }

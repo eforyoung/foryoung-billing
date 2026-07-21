@@ -23,13 +23,20 @@ export async function getPayments(filters: PaymentFilters) {
       ...(filters.year ? { year: filters.year } : {}),
       ...(filters.serviceType ? { serviceType: filters.serviceType } : {}),
     },
-    include: { client: { select: { name: true, phone: true } }, payment: true },
+    include: {
+      client: { select: { name: true, phone: true, unit: true } },
+      payment: true,
+      reading: true,
+    },
     orderBy: { paidDate: 'desc' },
   })
   return bills.map(b => ({
     ...b,
     amount: Number(b.amount),
     payment: b.payment ? { ...b.payment, amountPaid: Number(b.payment.amountPaid) } : null,
+    reading: b.reading
+      ? { consumption: Number(b.reading.consumption), consumptionCost: Number(b.reading.consumptionCost) }
+      : null,
   }))
 }
 
@@ -39,12 +46,15 @@ export async function getUnpaidBills() {
 
   const bills = await prisma.bill.findMany({
     where: { isPaid: false },
-    include: { client: { select: { name: true, phone: true } } },
+    include: { client: { select: { name: true, phone: true, unit: true } }, reading: true },
     orderBy: [{ year: 'asc' }, { month: 'asc' }],
   })
   return bills.map(b => ({
     ...b,
     amount: Number(b.amount),
+    reading: b.reading
+      ? { consumption: Number(b.reading.consumption), consumptionCost: Number(b.reading.consumptionCost) }
+      : null,
   }))
 }
 

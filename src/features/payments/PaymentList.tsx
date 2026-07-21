@@ -12,8 +12,11 @@ interface UnpaidBill {
   serviceType: 'INTERNET' | 'WATER' | 'RENT'
   month: number
   year: number
+  monthsCount: number
   amount: number
-  client: { name: string; phone: string }
+  dueDate: string | null
+  client: { name: string; phone: string; unit: string | null }
+  reading: { consumption: number; consumptionCost: number } | null
 }
 
 export function PaymentList() {
@@ -29,8 +32,11 @@ export function PaymentList() {
         serviceType: b.serviceType,
         month: b.month,
         year: b.year,
+        monthsCount: b.monthsCount,
         amount: b.amount,
+        dueDate: b.dueDate ? new Date(b.dueDate).toISOString().slice(0, 10) : null,
         client: b.client,
+        reading: b.reading,
       })),
     )
   }
@@ -47,14 +53,18 @@ export function PaymentList() {
       setMessage(result.error)
       return
     }
-    await generateReceiptPDF({
-      receiptNumber: `${bill.id.slice(0, 8).toUpperCase()}`,
-      clientName: bill.client.name,
-      clientPhone: bill.client.phone,
+    generateReceiptPDF({
+      id: bill.id,
       serviceType: bill.serviceType,
-      periodLabel: `${monthName(bill.month)} ${bill.year}`,
+      month: bill.month,
+      year: bill.year,
+      monthsCount: bill.monthsCount,
       amount: bill.amount,
       paidDate: today,
+      notes: null,
+      dueDate: bill.dueDate,
+      client: bill.client,
+      reading: bill.reading,
     })
     refresh()
   }

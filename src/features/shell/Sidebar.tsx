@@ -5,14 +5,14 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
-  { href: '/dashboard', label: 'Dashboard', adminOnly: false },
-  { href: '/dashboard/clients', label: 'Clients', adminOnly: false },
-  { href: '/dashboard/internet-bills', label: 'Internet Bills', adminOnly: false },
-  { href: '/dashboard/water-bills', label: 'Water Bills', adminOnly: false },
-  { href: '/dashboard/rent-bills', label: 'Rent Bills', adminOnly: false },
-  { href: '/dashboard/payments', label: 'Payments', adminOnly: false },
-  { href: '/dashboard/reports', label: 'Reports', adminOnly: true },
-  { href: '/dashboard/terms', label: 'Terms', adminOnly: true },
+  { href: '/dashboard', label: 'Dashboard', icon: '📊', adminOnly: false },
+  { href: '/dashboard/clients', label: 'Clients', icon: '👥', adminOnly: false },
+  { href: '/dashboard/internet-bills', label: 'Internet Bills', icon: '🌐', adminOnly: false },
+  { href: '/dashboard/water-bills', label: 'Water Bills', icon: '💧', adminOnly: false },
+  { href: '/dashboard/rent-bills', label: 'Rent Bills', icon: '🏠', adminOnly: false },
+  { href: '/dashboard/payments', label: 'Payments', icon: '💰', adminOnly: false },
+  { href: '/dashboard/reports', label: 'Reports', icon: '📈', adminOnly: true },
+  { href: '/dashboard/terms', label: 'Terms', icon: '📜', adminOnly: true },
 ]
 
 export function Sidebar({ isAdmin }: { isAdmin: boolean }) {
@@ -32,6 +32,7 @@ export function Sidebar({ isAdmin }: { isAdmin: boolean }) {
               : 'hover:bg-navy hover:text-teal',
           )}
         >
+          <span aria-hidden="true">{item.icon}</span>
           {item.label}
         </Link>
       ))}

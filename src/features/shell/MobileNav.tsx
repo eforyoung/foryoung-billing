@@ -5,9 +5,9 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 
 const ITEMS = [
-  { href: '/dashboard', label: 'Home' },
-  { href: '/dashboard/clients', label: 'Clients' },
-  { href: '/dashboard/payments', label: 'Payments' },
+  { href: '/dashboard', label: 'Home', icon: '📊' },
+  { href: '/dashboard/clients', label: 'Clients', icon: '👥' },
+  { href: '/dashboard/payments', label: 'Payments', icon: '💰' },
 ]
 
 export function MobileNav() {
@@ -23,6 +23,7 @@ export function MobileNav() {
             pathname === item.href && 'font-semibold text-teal',
           )}
         >
+          <span aria-hidden="true">{item.icon}</span>
           {item.label}
         </Link>
       ))}

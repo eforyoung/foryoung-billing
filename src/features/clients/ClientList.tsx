@@ -27,7 +27,7 @@ export function ClientList({ clients }: { clients: ClientWithServices[] }) {
       </div>
       <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
-        <thead className="text-white/50">
+        <thead className="text-slate-500">
           <tr>
             <th className="pb-2">Name</th>
             <th className="pb-2">Phone</th>
@@ -39,11 +39,11 @@ export function ClientList({ clients }: { clients: ClientWithServices[] }) {
         </thead>
         <tbody>
           {clients.map(c => (
-            <tr key={c.id} className="border-t border-white/10">
-              <td className="py-2 text-white">{c.name}</td>
-              <td className="py-2 text-white/70">{c.phone}</td>
-              <td className="py-2 text-white/70">{c.unit || '—'}</td>
-              <td className="py-2 text-white/70">{c.services.map(s => s.type).join(', ') || '—'}</td>
+            <tr key={c.id} className="border-t border-slate-100">
+              <td className="py-2 text-slate-900">{c.name}</td>
+              <td className="py-2 text-slate-600">{c.phone}</td>
+              <td className="py-2 text-slate-600">{c.unit || '—'}</td>
+              <td className="py-2 text-slate-600">{c.services.map(s => s.type).join(', ') || '—'}</td>
               <td className="py-2">
                 <Badge color={c.isActive ? 'green' : 'grey'}>{c.isActive ? 'Active' : 'Inactive'}</Badge>
               </td>
@@ -51,7 +51,7 @@ export function ClientList({ clients }: { clients: ClientWithServices[] }) {
                 <button className="text-teal hover:underline" onClick={() => openEdit(c)}>
                   Edit
                 </button>
-                <button className="text-white/50 hover:underline" onClick={() => toggleClientActive(c.id)}>
+                <button className="text-slate-500 hover:underline" onClick={() => toggleClientActive(c.id)}>
                   {c.isActive ? 'Deactivate' : 'Activate'}
                 </button>
               </td>

@@ -58,22 +58,22 @@ export function ClientForm({ open, onClose, editing }: ClientFormProps) {
   return (
     <SlideOver open={open} onClose={onClose} title={editing ? 'Edit Client' : 'Add Client'}>
       <form onSubmit={handleSubmit} className="space-y-4">
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && <p className="text-sm text-red-600">{error}</p>}
         <Input label="Name" value={name} onChange={e => setName(e.target.value)} required />
         <Input label="Phone" value={phone} onChange={e => setPhone(e.target.value)} required />
         <Input label="Email" type="email" value={email} onChange={e => setEmail(e.target.value)} />
         <Input label="Unit / Apartment" value={unit} onChange={e => setUnit(e.target.value)} />
 
         <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm text-white/80">
+          <label className="flex items-center gap-2 text-sm text-slate-700">
             <input type="checkbox" checked={hasInternet} onChange={e => setHasInternet(e.target.checked)} />
             Internet (10,000 XAF/month)
           </label>
-          <label className="flex items-center gap-2 text-sm text-white/80">
+          <label className="flex items-center gap-2 text-sm text-slate-700">
             <input type="checkbox" checked={hasWater} onChange={e => setHasWater(e.target.checked)} />
             Water
           </label>
-          <label className="flex items-center gap-2 text-sm text-white/80">
+          <label className="flex items-center gap-2 text-sm text-slate-700">
             <input type="checkbox" checked={hasRent} onChange={e => setHasRent(e.target.checked)} />
             Rent
           </label>
@@ -88,7 +88,7 @@ export function ClientForm({ open, onClose, editing }: ClientFormProps) {
         </div>
 
         <Input label="Notes" value={notes} onChange={e => setNotes(e.target.value)} />
-        <label className="flex items-center gap-2 text-sm text-white/80">
+        <label className="flex items-center gap-2 text-sm text-slate-700">
           <input type="checkbox" checked={isActive} onChange={e => setIsActive(e.target.checked)} />
           Active
         </label>

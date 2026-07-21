@@ -49,7 +49,7 @@ export function WaterBillRowActions({ bill }: WaterBillRowActionsProps) {
       </button>
       <Modal open={open} onClose={() => setOpen(false)} title="Edit Water Bill">
         <div className="space-y-3">
-          {error && <p className="text-sm text-red-400">{error}</p>}
+          {error && <p className="text-sm text-red-600">{error}</p>}
           <div className="flex flex-wrap gap-3">
             <Input label="Month" type="number" min={1} max={12} value={month} onChange={e => setMonth(Number(e.target.value))} />
             <Input label="Year" type="number" value={year} onChange={e => setYear(Number(e.target.value))} />
@@ -67,10 +67,10 @@ export function WaterBillRowActions({ bill }: WaterBillRowActionsProps) {
             onChange={e => setCurrentReading(Number(e.target.value))}
           />
           {breakdown && (
-            <div className="rounded border border-white/10 bg-black/20 p-3 text-sm text-white/80">
+            <div className="rounded border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
               <div className="flex justify-between">
                 <span>New total</span>
-                <span className="font-semibold text-white">{fmtXaf(breakdown.total)}</span>
+                <span className="font-semibold text-slate-900">{fmtXaf(breakdown.total)}</span>
               </div>
             </div>
           )}

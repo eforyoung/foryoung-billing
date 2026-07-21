@@ -41,7 +41,7 @@ export function InternetBillRowActions({ bill }: InternetBillRowActionsProps) {
       </button>
       <Modal open={open} onClose={() => setOpen(false)} title="Edit Internet Bill">
         <div className="space-y-3">
-          {error && <p className="text-sm text-red-400">{error}</p>}
+          {error && <p className="text-sm text-red-600">{error}</p>}
           <div className="flex flex-wrap gap-3">
             <Input label="Month" type="number" min={1} max={12} value={month} onChange={e => setMonth(Number(e.target.value))} />
             <Input label="Year" type="number" value={year} onChange={e => setYear(Number(e.target.value))} />
@@ -54,8 +54,8 @@ export function InternetBillRowActions({ bill }: InternetBillRowActionsProps) {
             onChange={e => setMonthsCount(Number(e.target.value))}
           />
           <Input label="Due date" type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} />
-          <p className="text-sm text-white/70">
-            New total: <span className="font-semibold text-white">{fmtXaf(computeInternetTotal(monthsCount))}</span>
+          <p className="text-sm text-slate-600">
+            New total: <span className="font-semibold text-slate-900">{fmtXaf(computeInternetTotal(monthsCount))}</span>
           </p>
           <div className="flex gap-2 pt-2">
             <Button onClick={handleSave} disabled={saving}>

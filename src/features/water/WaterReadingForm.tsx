@@ -62,16 +62,16 @@ export function WaterReadingForm() {
     <Card title="Enter Water Meter Reading">
       <div className="space-y-3">
         <div>
-          <label className="mb-1 block text-sm text-white/70">Client</label>
+          <label className="mb-1 block text-sm text-slate-600">Client</label>
           <select
             value={clientId}
             onChange={e => setClientId(e.target.value)}
             disabled={clientsLoading}
-            className="w-full rounded border border-white/20 bg-transparent px-3 py-2 text-white"
+            className="w-full rounded border border-slate-300 bg-white px-3 py-2 text-slate-900"
           >
-            <option value="" className="bg-dark-card text-white">{clientsLoading ? 'Loading clients…' : 'Select client…'}</option>
+            <option value="" className="bg-white text-slate-900">{clientsLoading ? 'Loading clients…' : 'Select client…'}</option>
             {clients.map(c => (
-              <option key={c.id} value={c.id} className="bg-dark-card text-white">
+              <option key={c.id} value={c.id} className="bg-white text-slate-900">
                 {c.name}{c.unit ? ` — ${c.unit}` : ''}
               </option>
             ))}
@@ -92,7 +92,7 @@ export function WaterReadingForm() {
           />
         )}
         {clientId && previousReading !== null && (
-          <p className="text-sm text-white/70">Previous reading: {previousReading.toFixed(1)} m³</p>
+          <p className="text-sm text-slate-600">Previous reading: {previousReading.toFixed(1)} m³</p>
         )}
 
         <Input
@@ -103,7 +103,7 @@ export function WaterReadingForm() {
         />
 
         {breakdown && (
-          <div className="space-y-1 rounded border border-white/10 bg-black/20 p-3 text-sm text-white/80">
+          <div className="space-y-1 rounded border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
             <div className="flex justify-between">
               <span>Consumption</span>
               <span>{breakdown.consumption} m³</span>
@@ -127,7 +127,7 @@ export function WaterReadingForm() {
               <span>Pump service fee</span>
               <span>{fmtXaf(breakdown.pumpServiceFee)}</span>
             </div>
-            <div className="flex justify-between border-t border-white/10 pt-1 font-semibold text-white">
+            <div className="flex justify-between border-t border-slate-200 pt-1 font-semibold text-slate-900">
               <span>Total</span>
               <span>{fmtXaf(breakdown.total)}</span>
             </div>

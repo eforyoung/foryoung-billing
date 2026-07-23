@@ -18,6 +18,7 @@ export async function getWaterBills() {
   return bills.map(b => ({
     ...b,
     amount: Number(b.amount),
+    amountPaid: Number(b.amountPaid),
     reading: b.reading
       ? {
           ...b.reading,
@@ -132,7 +133,7 @@ export async function updateWaterBill(
 
   const bill = await prisma.bill.findUnique({ where: { id: billId } })
   if (!bill) return { success: false, error: 'Bill not found' }
-  if (bill.isPaid) return { success: false, error: 'Cannot edit a paid bill.' }
+  if (Number(bill.amountPaid) > 0) return { success: false, error: 'Cannot edit a bill that has a payment recorded.' }
 
   const tenants = await countActiveWaterTenants()
   const breakdown = computeWaterBill(input.currentReading, input.previousReading, tenants)

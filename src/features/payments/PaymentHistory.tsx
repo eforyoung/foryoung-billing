@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Card, Button } from '@/lib/ui'
+import { Card, Button, Badge } from '@/lib/ui'
 import { fmtXaf, monthName } from '@/lib/utils'
 import { getPayments } from './actions'
 import { generateReceiptPDF } from '@/features/receipts/ReceiptPDF'
@@ -9,15 +9,21 @@ import type { ServiceType } from '@prisma/client'
 
 interface PaymentRow {
   id: string
-  serviceType: 'INTERNET' | 'WATER' | 'RENT'
-  month: number
-  year: number
-  monthsCount: number
-  amount: number
-  dueDate: Date | string | null
-  client: { name: string; phone: string; unit: string | null }
-  reading: { consumption: number; consumptionCost: number } | null
-  payment: { amountPaid: number; paymentDate: Date | string; notes: string | null } | null
+  amountPaid: number
+  paymentDate: Date | string
+  notes: string | null
+  balanceAfter: number
+  bill: {
+    id: string
+    serviceType: 'INTERNET' | 'WATER' | 'RENT'
+    month: number
+    year: number
+    monthsCount: number
+    amount: number
+    dueDate: Date | string | null
+    client: { name: string; phone: string; unit: string | null }
+    reading: { consumption: number; consumptionCost: number } | null
+  }
 }
 
 export function PaymentHistory() {
@@ -44,19 +50,20 @@ export function PaymentHistory() {
   }, [])
 
   function handleDownload(row: PaymentRow) {
-    if (!row.payment) return
     generateReceiptPDF({
-      id: row.id,
-      serviceType: row.serviceType,
-      month: row.month,
-      year: row.year,
-      monthsCount: row.monthsCount,
-      amount: row.payment.amountPaid,
-      paidDate: new Date(row.payment.paymentDate).toISOString().slice(0, 10),
-      notes: row.payment.notes,
-      dueDate: row.dueDate ? new Date(row.dueDate).toISOString().slice(0, 10) : null,
-      client: row.client,
-      reading: row.reading,
+      id: row.bill.id,
+      serviceType: row.bill.serviceType,
+      month: row.bill.month,
+      year: row.bill.year,
+      monthsCount: row.bill.monthsCount,
+      billTotal: row.bill.amount,
+      amountPaidNow: row.amountPaid,
+      balanceRemaining: row.balanceAfter,
+      paidDate: new Date(row.paymentDate).toISOString().slice(0, 10),
+      notes: row.notes,
+      dueDate: row.bill.dueDate ? new Date(row.bill.dueDate).toISOString().slice(0, 10) : null,
+      client: row.bill.client,
+      reading: row.bill.reading,
     })
   }
 
@@ -108,7 +115,8 @@ export function PaymentHistory() {
             <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Client</th>
             <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Service</th>
             <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Period</th>
-            <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Amount</th>
+            <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Amount Paid</th>
+            <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Balance After</th>
             <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Paid Date</th>
             <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Actions</th>
           </tr>
@@ -116,17 +124,22 @@ export function PaymentHistory() {
         <tbody>
           {rows.map(r => (
             <tr key={r.id} className="border-t border-slate-100">
-              <td className="px-3 py-2 text-slate-900">{r.client.name}</td>
-              <td className="px-3 py-2 text-slate-600">{r.serviceType}</td>
+              <td className="px-3 py-2 text-slate-900">{r.bill.client.name}</td>
+              <td className="px-3 py-2 text-slate-600">{r.bill.serviceType}</td>
               <td className="px-3 py-2 text-slate-600">
-                {monthName(r.month)} {r.year}
+                {monthName(r.bill.month)} {r.bill.year}
               </td>
-              <td className="px-3 py-2 text-slate-600">{fmtXaf(r.amount)}</td>
+              <td className="px-3 py-2 text-slate-600">{fmtXaf(r.amountPaid)}</td>
               <td className="px-3 py-2 text-slate-600">
-                {r.payment ? new Date(r.payment.paymentDate).toISOString().slice(0, 10) : '—'}
+                {r.balanceAfter > 0 ? (
+                  <Badge color="blue">{fmtXaf(r.balanceAfter)}</Badge>
+                ) : (
+                  <Badge color="green">Paid in Full</Badge>
+                )}
               </td>
+              <td className="px-3 py-2 text-slate-600">{new Date(r.paymentDate).toISOString().slice(0, 10)}</td>
               <td className="px-3 py-2">
-                <Button size="sm" onClick={() => handleDownload(r)} disabled={!r.payment}>
+                <Button size="sm" onClick={() => handleDownload(r)}>
                   Download Receipt
                 </Button>
               </td>
@@ -134,7 +147,7 @@ export function PaymentHistory() {
           ))}
           {rows.length === 0 && (
             <tr>
-              <td colSpan={6} className="py-4 text-center text-slate-400">
+              <td colSpan={7} className="py-4 text-center text-slate-400">
                 {loading ? 'Loading…' : 'No payments found.'}
               </td>
             </tr>

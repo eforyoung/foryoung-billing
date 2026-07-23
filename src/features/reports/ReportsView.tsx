@@ -1,9 +1,17 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Card, Input, Button } from '@/lib/ui'
+import { Card, Input, Button, Badge } from '@/lib/ui'
 import { fmtXaf } from '@/lib/utils'
-import { getReport, saveProviderCost, saveVariableCost, deleteVariableCost, type ReportData } from './actions'
+import {
+  getReport,
+  saveProviderCost,
+  saveVariableCost,
+  deleteVariableCost,
+  getArrears,
+  type ReportData,
+  type ClientArrearsRow,
+} from './actions'
 
 export function ReportsView() {
   const [month, setMonth] = useState(new Date().getMonth() + 1)
@@ -11,10 +19,12 @@ export function ReportsView() {
   const [report, setReport] = useState<ReportData | null>(null)
   const [internetCost, setInternetCost] = useState(0)
   const [waterCost, setWaterCost] = useState(0)
-  const [tab, setTab] = useState<'pnl' | 'variable'>('pnl')
+  const [tab, setTab] = useState<'pnl' | 'variable' | 'arrears'>('pnl')
   const [newLabel, setNewLabel] = useState('House Repairs')
   const [newAmount, setNewAmount] = useState(0)
   const [newNotes, setNewNotes] = useState('')
+  const [arrears, setArrears] = useState<ClientArrearsRow[]>([])
+  const [arrearsLoading, setArrearsLoading] = useState(false)
 
   async function refresh() {
     const result = await getReport(month, year)
@@ -28,6 +38,18 @@ export function ReportsView() {
     refresh()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [month, year])
+
+  async function refreshArrears() {
+    setArrearsLoading(true)
+    const result = await getArrears()
+    setArrears('error' in result ? [] : result)
+    setArrearsLoading(false)
+  }
+
+  function selectTab(next: 'pnl' | 'variable' | 'arrears') {
+    setTab(next)
+    if (next === 'arrears') refreshArrears()
+  }
 
   async function handleSaveCosts() {
     await saveProviderCost({ serviceType: 'INTERNET', month, year, amount: internetCost })
@@ -57,11 +79,14 @@ export function ReportsView() {
             <Input label="Year" type="number" value={year} onChange={e => setYear(Number(e.target.value))} />
           </div>
           <div className="flex gap-2">
-            <Button variant={tab === 'pnl' ? 'primary' : 'ghost'} size="sm" onClick={() => setTab('pnl')}>
+            <Button variant={tab === 'pnl' ? 'primary' : 'ghost'} size="sm" onClick={() => selectTab('pnl')}>
               P&amp;L
             </Button>
-            <Button variant={tab === 'variable' ? 'primary' : 'ghost'} size="sm" onClick={() => setTab('variable')}>
+            <Button variant={tab === 'variable' ? 'primary' : 'ghost'} size="sm" onClick={() => selectTab('variable')}>
               Variable Costs
+            </Button>
+            <Button variant={tab === 'arrears' ? 'primary' : 'ghost'} size="sm" onClick={() => selectTab('arrears')}>
+              Arrears
             </Button>
           </div>
         </div>
@@ -171,6 +196,53 @@ export function ReportsView() {
             <div className="flex justify-between border-t border-slate-200 pt-3 text-sm font-semibold">
               <span className="text-slate-600">Total Variable Costs</span>
               <span className="text-slate-900">{fmtXaf(report.totalVariableCosts)}</span>
+            </div>
+          </div>
+        )}
+
+        {tab === 'arrears' && (
+          <div className="space-y-4">
+            <p className="text-sm text-slate-600">
+              Every client with an outstanding balance across Internet, Water, and Rent — worst offenders first.
+            </p>
+            <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="bg-navy">
+                  <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Client</th>
+                  <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Unit</th>
+                  <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Internet</th>
+                  <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Water</th>
+                  <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Rent</th>
+                  <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Total Owed</th>
+                  <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Unpaid Bills</th>
+                  <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Oldest Unpaid</th>
+                </tr>
+              </thead>
+              <tbody>
+                {arrears.map(a => (
+                  <tr key={a.clientId} className="border-t border-slate-100">
+                    <td className="px-3 py-2 text-slate-900">{a.clientName}</td>
+                    <td className="px-3 py-2 text-slate-600">{a.clientUnit || '—'}</td>
+                    <td className="px-3 py-2 text-slate-600">{a.internetOwed > 0 ? fmtXaf(a.internetOwed) : '—'}</td>
+                    <td className="px-3 py-2 text-slate-600">{a.waterOwed > 0 ? fmtXaf(a.waterOwed) : '—'}</td>
+                    <td className="px-3 py-2 text-slate-600">{a.rentOwed > 0 ? fmtXaf(a.rentOwed) : '—'}</td>
+                    <td className="px-3 py-2">
+                      <Badge color="amber">{fmtXaf(a.totalOwed)}</Badge>
+                    </td>
+                    <td className="px-3 py-2 text-slate-600">{a.unpaidBillCount}</td>
+                    <td className="px-3 py-2 text-slate-600">{a.oldestUnpaidLabel || '—'}</td>
+                  </tr>
+                ))}
+                {arrears.length === 0 && (
+                  <tr>
+                    <td colSpan={8} className="py-4 text-center text-slate-400">
+                      {arrearsLoading ? 'Loading…' : 'No clients currently in arrears.'}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
             </div>
           </div>
         )}

@@ -10,11 +10,12 @@ export async function DashboardView() {
     { label: 'Active Clients', value: summary.activeClients },
     { label: 'Unpaid Bills', value: summary.unpaidBillsCount },
     { label: 'Revenue This Month', value: fmtXaf(summary.revenueThisMonth) },
+    { label: 'Total Arrears', value: fmtXaf(summary.totalArrears) },
   ]
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
         {cards.map(c => (
           <Card key={c.label}>
             <p className="text-xs text-slate-500">{c.label}</p>
@@ -31,7 +32,7 @@ export async function DashboardView() {
                 <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Client</th>
                 <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Service</th>
                 <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Period</th>
-                <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Amount</th>
+                <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Balance Due</th>
               </tr>
             </thead>
             <tbody>
@@ -44,7 +45,7 @@ export async function DashboardView() {
                   <td className="px-3 py-2 text-slate-600">
                     {monthName(b.month)} {b.year}
                   </td>
-                  <td className="px-3 py-2 text-slate-600">{fmtXaf(b.amount)}</td>
+                  <td className="px-3 py-2 text-slate-600">{fmtXaf(b.balanceDue)}</td>
                 </tr>
               ))}
               {summary.recentUnpaid.length === 0 && (

@@ -61,11 +61,12 @@ model Bill {
   year        Int
   monthsCount Int           @default(1)
   amount      Decimal
+  amountPaid  Decimal       @default(0)
   isPaid      Boolean       @default(false)
   paidDate    DateTime?
   dueDate     DateTime?
   createdAt   DateTime      @default(now())
-  payment     Payment?
+  payments    Payment[]
   reading     WaterReading?
 
   @@unique([clientId, serviceType, year, month])
@@ -113,12 +114,14 @@ model VariableCost {
 
 model Payment {
   id          String   @id @default(uuid())
-  billId      String   @unique
+  billId      String
   bill        Bill     @relation(fields: [billId], references: [id])
   amountPaid  Decimal
   paymentDate DateTime @default(now())
   notes       String?
   recordedBy  String?
+
+  @@index([billId])
 }
 
 model BillingSettings {

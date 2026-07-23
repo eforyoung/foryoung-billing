@@ -12,13 +12,13 @@ export async function getInternetBills() {
 
   const bills = await prisma.bill.findMany({
     where: { serviceType: 'INTERNET' },
-    include: { client: { select: { name: true } }, payment: true },
+    include: { client: { select: { name: true } } },
     orderBy: [{ year: 'desc' }, { month: 'desc' }],
   })
   return bills.map(b => ({
     ...b,
     amount: Number(b.amount),
-    payment: b.payment ? { ...b.payment, amountPaid: Number(b.payment.amountPaid) } : null,
+    amountPaid: Number(b.amountPaid),
   }))
 }
 
@@ -26,8 +26,11 @@ export async function checkInternetArrears(clientId: string, month: number, year
   const session = await auth()
   if (!session?.user) return { bills: [], totalMonths: 0, totalAmount: 0 }
 
+  // Only fully-untouched unpaid bills are eligible for consolidation — a bill with a
+  // partial payment already recorded must stay standalone (its own history stays
+  // intact, and deleting it here would violate the Payment foreign key).
   const unpaid = await prisma.bill.findMany({
-    where: { clientId, serviceType: 'INTERNET', isPaid: false },
+    where: { clientId, serviceType: 'INTERNET', isPaid: false, amountPaid: 0 },
   })
   return findArrears(
     unpaid.map(b => ({ id: b.id, month: b.month, year: b.year, monthsCount: b.monthsCount, amount: Number(b.amount) })),
@@ -63,7 +66,7 @@ export async function generateInternetBill(input: GenerateInternetBillInput): Pr
 
     if (input.consolidate) {
       const unpaid = await prisma.bill.findMany({
-        where: { clientId: input.clientId, serviceType: 'INTERNET', isPaid: false },
+        where: { clientId: input.clientId, serviceType: 'INTERNET', isPaid: false, amountPaid: 0 },
       })
       const arrears = findArrears(
         unpaid.map(b => ({ id: b.id, month: b.month, year: b.year, monthsCount: b.monthsCount, amount: Number(b.amount) })),
@@ -114,7 +117,7 @@ export async function updateInternetBill(
 
   const bill = await prisma.bill.findUnique({ where: { id: billId } })
   if (!bill) return { success: false, error: 'Bill not found' }
-  if (bill.isPaid) return { success: false, error: 'Cannot edit a paid bill.' }
+  if (Number(bill.amountPaid) > 0) return { success: false, error: 'Cannot edit a bill that has a payment recorded.' }
 
   const monthsCount = Math.max(1, input.monthsCount)
   const amount = computeInternetTotal(monthsCount)

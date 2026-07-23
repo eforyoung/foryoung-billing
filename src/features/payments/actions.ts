@@ -16,28 +16,58 @@ export async function getPayments(filters: PaymentFilters) {
   const session = await auth()
   if (!session?.user) return []
 
-  const bills = await prisma.bill.findMany({
+  const payments = await prisma.payment.findMany({
     where: {
-      isPaid: true,
-      ...(filters.month ? { month: filters.month } : {}),
-      ...(filters.year ? { year: filters.year } : {}),
-      ...(filters.serviceType ? { serviceType: filters.serviceType } : {}),
+      bill: {
+        ...(filters.month ? { month: filters.month } : {}),
+        ...(filters.year ? { year: filters.year } : {}),
+        ...(filters.serviceType ? { serviceType: filters.serviceType } : {}),
+      },
     },
     include: {
-      client: { select: { name: true, phone: true, unit: true } },
-      payment: true,
-      reading: true,
+      bill: {
+        include: {
+          client: { select: { name: true, phone: true, unit: true } },
+          reading: true,
+          payments: { select: { amountPaid: true, paymentDate: true } },
+        },
+      },
     },
-    orderBy: { paidDate: 'desc' },
+    orderBy: { paymentDate: 'desc' },
   })
-  return bills.map(b => ({
-    ...b,
-    amount: Number(b.amount),
-    payment: b.payment ? { ...b.payment, amountPaid: Number(b.payment.amountPaid) } : null,
-    reading: b.reading
-      ? { consumption: Number(b.reading.consumption), consumptionCost: Number(b.reading.consumptionCost) }
-      : null,
-  }))
+
+  return payments.map(p => {
+    const billAmount = Number(p.bill.amount)
+    // Balance as of THIS payment's date, not the bill's current running total —
+    // reprinting an earlier payment's receipt after later payments must still
+    // reflect what was owed at that point in time, not today's balance.
+    const paidAsOfThisPayment = p.bill.payments
+      .filter(sib => sib.paymentDate.getTime() <= p.paymentDate.getTime())
+      .reduce((s, sib) => s + Number(sib.amountPaid), 0)
+    const balanceAfter = Math.max(0, billAmount - paidAsOfThisPayment)
+
+    return {
+      id: p.id,
+      billId: p.billId,
+      amountPaid: Number(p.amountPaid),
+      paymentDate: p.paymentDate,
+      notes: p.notes,
+      balanceAfter,
+      bill: {
+        id: p.bill.id,
+        serviceType: p.bill.serviceType,
+        month: p.bill.month,
+        year: p.bill.year,
+        monthsCount: p.bill.monthsCount,
+        amount: billAmount,
+        dueDate: p.bill.dueDate,
+        client: p.bill.client,
+        reading: p.bill.reading
+          ? { consumption: Number(p.bill.reading.consumption), consumptionCost: Number(p.bill.reading.consumptionCost) }
+          : null,
+      },
+    }
+  })
 }
 
 export async function getUnpaidBills() {
@@ -52,37 +82,63 @@ export async function getUnpaidBills() {
   return bills.map(b => ({
     ...b,
     amount: Number(b.amount),
+    amountPaid: Number(b.amountPaid),
     reading: b.reading
       ? { consumption: Number(b.reading.consumption), consumptionCost: Number(b.reading.consumptionCost) }
       : null,
   }))
 }
 
-export async function markBillPaid(billId: string, paymentDate: string, notes?: string): Promise<ActionResult> {
+export async function recordPayment(
+  billId: string,
+  amount: number,
+  paymentDate: string,
+  notes?: string,
+): Promise<ActionResult> {
   const session = await auth()
   if (!session?.user) return { success: false, error: 'Not authenticated' }
 
   const bill = await prisma.bill.findUnique({ where: { id: billId } })
   if (!bill) return { success: false, error: 'Bill not found' }
-  if (bill.isPaid) return { success: false, error: 'Bill is already marked as paid' }
+  if (bill.isPaid) return { success: false, error: 'Bill is already fully paid.' }
+
+  const billAmount = Number(bill.amount)
+  const alreadyPaid = Number(bill.amountPaid)
+  const remaining = billAmount - alreadyPaid
+
+  if (!(amount > 0)) return { success: false, error: 'Payment amount must be greater than zero.' }
+  if (amount > remaining) {
+    return {
+      success: false,
+      error: `Amount exceeds the remaining balance of ${remaining.toLocaleString('en-US')} XAF.`,
+    }
+  }
 
   const paidDateObj = new Date(paymentDate)
 
   try {
     await prisma.$transaction(async (tx) => {
-      await tx.bill.update({ where: { id: billId }, data: { isPaid: true, paidDate: paidDateObj } })
       await tx.payment.create({
         data: {
           billId,
-          amountPaid: bill.amount,
+          amountPaid: amount,
           paymentDate: paidDateObj,
           notes,
           recordedBy: session.user.id,
         },
       })
+      // Atomic increment — avoids a lost update if two payments on the same
+      // bill are recorded concurrently (each read a stale amountPaid).
+      const updated = await tx.bill.update({
+        where: { id: billId },
+        data: { amountPaid: { increment: amount } },
+      })
+      if (Number(updated.amountPaid) >= billAmount) {
+        await tx.bill.update({ where: { id: billId }, data: { isPaid: true, paidDate: paidDateObj } })
+      }
     })
   } catch (error) {
-    console.error('markBillPaid failed:', error)
+    console.error('recordPayment failed:', error)
     return { success: false, error: 'Failed to record payment.' }
   }
 
@@ -90,5 +146,6 @@ export async function markBillPaid(billId: string, paymentDate: string, notes?: 
   revalidatePath('/dashboard/internet-bills')
   revalidatePath('/dashboard/water-bills')
   revalidatePath('/dashboard/rent-bills')
+  revalidatePath('/dashboard/reports')
   return { success: true, data: undefined }
 }

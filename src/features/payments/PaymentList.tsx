@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Card, Button, Badge, Modal, Input } from '@/lib/ui'
 import { fmtXaf, monthName } from '@/lib/utils'
-import { getUnpaidBills, markBillPaid } from './actions'
+import { getUnpaidBills, recordPayment } from './actions'
 import { generateReceiptPDF } from '@/features/receipts/ReceiptPDF'
 
 interface UnpaidBill {
@@ -14,6 +14,7 @@ interface UnpaidBill {
   year: number
   monthsCount: number
   amount: number
+  amountPaid: number
   dueDate: string | null
   client: { name: string; phone: string; unit: string | null }
   reading: { consumption: number; consumptionCost: number } | null
@@ -22,6 +23,7 @@ interface UnpaidBill {
 export function PaymentList() {
   const [bills, setBills] = useState<UnpaidBill[]>([])
   const [payingBill, setPayingBill] = useState<UnpaidBill | null>(null)
+  const [amount, setAmount] = useState(0)
   const [paymentDate, setPaymentDate] = useState('')
   const [notes, setNotes] = useState('')
   const [saving, setSaving] = useState(false)
@@ -38,6 +40,7 @@ export function PaymentList() {
         year: b.year,
         monthsCount: b.monthsCount,
         amount: b.amount,
+        amountPaid: b.amountPaid,
         dueDate: b.dueDate ? new Date(b.dueDate).toISOString().slice(0, 10) : null,
         client: b.client,
         reading: b.reading,
@@ -53,6 +56,7 @@ export function PaymentList() {
     setModalError('')
     setNotes('')
     setPaymentDate(new Date().toISOString().slice(0, 10))
+    setAmount(bill.amount - bill.amountPaid)
     setPayingBill(bill)
   }
 
@@ -67,21 +71,33 @@ export function PaymentList() {
       setModalError('Please select a payment date.')
       return
     }
+    const remaining = payingBill.amount - payingBill.amountPaid
+    if (!(amount > 0)) {
+      setModalError('Payment amount must be greater than zero.')
+      return
+    }
+    if (amount > remaining) {
+      setModalError(`Amount exceeds the remaining balance of ${fmtXaf(remaining)}.`)
+      return
+    }
     setModalError('')
     setSaving(true)
     try {
-      const result = await markBillPaid(payingBill.id, paymentDate, notes || undefined)
+      const result = await recordPayment(payingBill.id, amount, paymentDate, notes || undefined)
       if (!result.success) {
         setModalError(result.error)
         return
       }
+      const balanceRemaining = remaining - amount
       generateReceiptPDF({
         id: payingBill.id,
         serviceType: payingBill.serviceType,
         month: payingBill.month,
         year: payingBill.year,
         monthsCount: payingBill.monthsCount,
-        amount: payingBill.amount,
+        billTotal: payingBill.amount,
+        amountPaidNow: amount,
+        balanceRemaining,
         paidDate: paymentDate,
         notes: notes || null,
         dueDate: payingBill.dueDate,
@@ -106,7 +122,9 @@ export function PaymentList() {
             <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Client</th>
             <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Service</th>
             <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Period</th>
-            <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Amount</th>
+            <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Bill Total</th>
+            <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Balance Due</th>
+            <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Status</th>
             <th className="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-white">Actions</th>
           </tr>
         </thead>
@@ -121,16 +139,20 @@ export function PaymentList() {
                 {monthName(b.month)} {b.year}
               </td>
               <td className="px-3 py-2 text-slate-600">{fmtXaf(b.amount)}</td>
+              <td className="px-3 py-2 text-slate-600">{fmtXaf(b.amount - b.amountPaid)}</td>
+              <td className="px-3 py-2">
+                <Badge color={b.amountPaid > 0 ? 'blue' : 'amber'}>{b.amountPaid > 0 ? 'Partial' : 'Unpaid'}</Badge>
+              </td>
               <td className="px-3 py-2">
                 <Button size="sm" onClick={() => openPayModal(b)}>
-                  Mark Paid + Receipt
+                  Record Payment
                 </Button>
               </td>
             </tr>
           ))}
           {bills.length === 0 && (
             <tr>
-              <td colSpan={5} className="py-4 text-center text-slate-400">
+              <td colSpan={7} className="py-4 text-center text-slate-400">
                 No unpaid bills.
               </td>
             </tr>
@@ -139,15 +161,28 @@ export function PaymentList() {
       </table>
       </div>
 
-      <Modal open={!!payingBill} onClose={closePayModal} title="Confirm Payment">
+      <Modal open={!!payingBill} onClose={closePayModal} title="Record Payment">
         <div className="space-y-3">
           {payingBill && (
             <p className="text-sm text-slate-600">
-              {payingBill.client.name} — {monthName(payingBill.month)} {payingBill.year} —{' '}
-              <span className="font-semibold text-slate-900">{fmtXaf(payingBill.amount)}</span>
+              {payingBill.client.name} — {monthName(payingBill.month)} {payingBill.year}
+              <br />
+              Bill Total: <span className="font-semibold text-slate-900">{fmtXaf(payingBill.amount)}</span> · Already
+              Paid: <span className="font-semibold text-slate-900">{fmtXaf(payingBill.amountPaid)}</span> · Balance
+              Due:{' '}
+              <span className="font-semibold text-slate-900">
+                {fmtXaf(payingBill.amount - payingBill.amountPaid)}
+              </span>
             </p>
           )}
           {modalError && <p className="text-sm text-red-600">{modalError}</p>}
+          <Input
+            label="Amount received"
+            type="number"
+            min={0}
+            value={amount}
+            onChange={e => setAmount(Number(e.target.value))}
+          />
           <Input
             label="Payment date"
             type="date"

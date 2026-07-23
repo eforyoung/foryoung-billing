@@ -8,22 +8,25 @@ export interface DashboardSummary {
   activeClients: number
   unpaidBillsCount: number
   revenueThisMonth: number
-  recentUnpaid: { id: string; clientName: string; serviceType: string; amount: number; month: number; year: number }[]
+  totalArrears: number
+  recentUnpaid: { id: string; clientName: string; serviceType: string; balanceDue: number; month: number; year: number }[]
 }
 
 export async function getDashboardSummary(): Promise<DashboardSummary> {
   const session = await auth()
-  if (!session?.user) return { totalClients: 0, activeClients: 0, unpaidBillsCount: 0, revenueThisMonth: 0, recentUnpaid: [] }
+  if (!session?.user) {
+    return { totalClients: 0, activeClients: 0, unpaidBillsCount: 0, revenueThisMonth: 0, totalArrears: 0, recentUnpaid: [] }
+  }
 
   const now = new Date()
   const month = now.getMonth() + 1
   const year = now.getFullYear()
 
-  const [totalClients, activeClients, unpaidBillsCount, paidThisMonth, recentUnpaidBills] = await Promise.all([
+  const [totalClients, activeClients, unpaidBills, billsThisPeriod, recentUnpaidBills] = await Promise.all([
     prisma.client.count(),
     prisma.client.count({ where: { isActive: true } }),
-    prisma.bill.count({ where: { isPaid: false } }),
-    prisma.bill.findMany({ where: { isPaid: true, month, year }, select: { amount: true } }),
+    prisma.bill.findMany({ where: { isPaid: false }, select: { amount: true, amountPaid: true } }),
+    prisma.bill.findMany({ where: { month, year }, select: { amountPaid: true } }),
     prisma.bill.findMany({
       where: { isPaid: false },
       include: { client: { select: { name: true } } },
@@ -35,13 +38,14 @@ export async function getDashboardSummary(): Promise<DashboardSummary> {
   return {
     totalClients,
     activeClients,
-    unpaidBillsCount,
-    revenueThisMonth: paidThisMonth.reduce((s, b) => s + Number(b.amount), 0),
+    unpaidBillsCount: unpaidBills.length,
+    revenueThisMonth: billsThisPeriod.reduce((s, b) => s + Number(b.amountPaid), 0),
+    totalArrears: unpaidBills.reduce((s, b) => s + (Number(b.amount) - Number(b.amountPaid)), 0),
     recentUnpaid: recentUnpaidBills.map(b => ({
       id: b.id,
       clientName: b.client.name,
       serviceType: b.serviceType,
-      amount: Number(b.amount),
+      balanceDue: Number(b.amount) - Number(b.amountPaid),
       month: b.month,
       year: b.year,
     })),

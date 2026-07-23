@@ -12,7 +12,9 @@ export interface ReceiptBillInput {
   month: number
   year: number
   monthsCount: number
-  amount: number
+  billTotal: number
+  amountPaidNow: number
+  balanceRemaining: number
   paidDate: string
   notes?: string | null
   dueDate?: string | null
@@ -72,7 +74,7 @@ function buildDetailLines(bill: ReceiptBillInput): { label: string; value: strin
   }
   // RENT
   const months = bill.monthsCount || 1
-  const perMonth = months > 0 ? bill.amount / months : bill.amount
+  const perMonth = months > 0 ? bill.billTotal / months : bill.billTotal
   return [
     { label: 'Rate', value: `${fmt(perMonth)}/mo` },
     { label: 'Months', value: String(months) },
@@ -155,6 +157,10 @@ export function generateReceiptPDF(bill: ReceiptBillInput): void {
 
   dashedDivider()
 
+  const isPaidInFull = bill.balanceRemaining <= 0
+
+  row('Bill Total', `${fmt(bill.billTotal)} XAF`)
+
   pdf.setDrawColor('#1e3a5f')
   pdf.setLineWidth(0.6)
   pdf.line(M, y - 3, rightX, y - 3)
@@ -162,12 +168,18 @@ export function generateReceiptPDF(bill: ReceiptBillInput): void {
   pdf.setFont('helvetica', 'bold')
   pdf.setFontSize(14)
   pdf.setTextColor('#1e3a5f')
-  pdf.text('Amount Paid', M, y)
-  pdf.text(`${fmt(bill.amount)} XAF`, rightX, y, { align: 'right' })
+  pdf.text('Amount Paid (this payment)', M, y)
+  pdf.text(`${fmt(bill.amountPaidNow)} XAF`, rightX, y, { align: 'right' })
   y += 8
 
+  if (!isPaidInFull) {
+    row('Balance Remaining', `${fmt(bill.balanceRemaining)} XAF`, { color: '#b45309', bold: true })
+  }
   row('Payment Date', formatDate(bill.paidDate))
-  row('Status', 'Paid', { color: '#059669', bold: true })
+  row('Status', isPaidInFull ? 'Paid in Full' : 'Partial Payment', {
+    color: isPaidInFull ? '#059669' : '#b45309',
+    bold: true,
+  })
 
   dashedDivider()
 

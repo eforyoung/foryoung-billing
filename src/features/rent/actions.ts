@@ -18,6 +18,7 @@ export async function getRentBills() {
   return bills.map(b => ({
     ...b,
     amount: Number(b.amount),
+    amountPaid: Number(b.amountPaid),
   }))
 }
 
@@ -84,7 +85,7 @@ export async function updateRentBill(
 
   const bill = await prisma.bill.findUnique({ where: { id: billId } })
   if (!bill) return { success: false, error: 'Bill not found' }
-  if (bill.isPaid) return { success: false, error: 'Cannot edit a paid bill.' }
+  if (Number(bill.amountPaid) > 0) return { success: false, error: 'Cannot edit a bill that has a payment recorded.' }
 
   const monthsCount = Math.max(1, input.monthsCount)
   const amount = computeRentTotal(input.amount, monthsCount)

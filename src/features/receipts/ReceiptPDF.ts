@@ -66,7 +66,7 @@ function buildDetailLines(bill: ReceiptBillInput): { label: string; value: strin
     }
     return [
       { label: 'Consumption', value: `${r.consumption.toFixed(1)} m³` },
-      { label: 'Rate', value: '700 F/m³' },
+      { label: 'Rate', value: '500 F/m³' },
       { label: 'Consumption Cost', value: fmt(r.consumptionCost) },
       { label: 'Electricity Fee (flat)', value: '1,000 F' },
       { label: 'Pump Service Fee (flat)', value: '2,000 F' },

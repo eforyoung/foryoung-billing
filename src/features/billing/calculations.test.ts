@@ -2,14 +2,14 @@ import { describe, it, expect } from 'vitest'
 import { computeWaterBill, computeInternetTotal, computeRentTotal, findArrears } from './calculations'
 
 describe('computeWaterBill', () => {
-  it('charges consumption at 700/unit plus flat fees when consumption > 0', () => {
+  it('charges consumption at 500/unit plus flat fees when consumption > 0', () => {
     const result = computeWaterBill(120, 100, 5)
     expect(result.consumption).toBe(20)
-    expect(result.consumptionCost).toBe(14000)
+    expect(result.consumptionCost).toBe(10000)
     expect(result.electricityFee).toBe(1000)
     expect(result.pumpServiceFee).toBe(2000)
     expect(result.defaultTaxShare).toBe(0)
-    expect(result.total).toBe(17000)
+    expect(result.total).toBe(13000)
   })
 
   it('splits the 930 default tax share across active water tenants when consumption is zero', () => {

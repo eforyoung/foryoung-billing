@@ -115,7 +115,7 @@ export function WaterReadingForm() {
               </div>
             ) : (
               <div className="flex justify-between">
-                <span>Consumption cost (@ 700 F/m³)</span>
+                <span>Consumption cost (@ 500 F/m³)</span>
                 <span>{fmtXaf(breakdown.consumptionCost)}</span>
               </div>
             )}

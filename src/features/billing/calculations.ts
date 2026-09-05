@@ -9,7 +9,7 @@ export interface WaterBillBreakdown {
 
 const ELECTRICITY_FEE = 1000
 const PUMP_SERVICE_FEE = 2000
-const CONSUMPTION_RATE = 700
+const CONSUMPTION_RATE = 500
 const DEFAULT_TAX_BASE = 930 // 780 base + 150 surcharge, split across active water tenants
 
 export function computeWaterBill(

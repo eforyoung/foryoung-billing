@@ -6,7 +6,7 @@ import { toggleClientActive } from './actions'
 import { ClientForm } from './ClientForm'
 import type { ClientWithServices } from './types'
 
-export function ClientList({ clients }: { clients: ClientWithServices[] }) {
+export function ClientList({ clients, platformId }: { clients: ClientWithServices[]; platformId: string }) {
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<ClientWithServices | null>(null)
 
@@ -51,7 +51,7 @@ export function ClientList({ clients }: { clients: ClientWithServices[] }) {
                 <button className="text-navy hover:underline" onClick={() => openEdit(c)}>
                   Edit
                 </button>
-                <button className="text-slate-500 hover:underline" onClick={() => toggleClientActive(c.id)}>
+                <button className="text-slate-500 hover:underline" onClick={() => toggleClientActive(c.id, platformId)}>
                   {c.isActive ? 'Deactivate' : 'Activate'}
                 </button>
               </td>
@@ -65,6 +65,7 @@ export function ClientList({ clients }: { clients: ClientWithServices[] }) {
         open={formOpen}
         onClose={() => setFormOpen(false)}
         editing={editing}
+        platformId={platformId}
       />
     </Card>
   )

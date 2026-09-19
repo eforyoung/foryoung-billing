@@ -4,14 +4,14 @@ import { useState } from 'react'
 import { Card, Textarea, Button } from '@/lib/ui'
 import { saveTerms } from './actions'
 
-export function TermsEditor({ initialText }: { initialText: string }) {
+export function TermsEditor({ initialText, platformId }: { initialText: string; platformId: string }) {
   const [text, setText] = useState(initialText)
   const [message, setMessage] = useState('')
   const [saving, setSaving] = useState(false)
 
   async function handleSave() {
     setSaving(true)
-    const result = await saveTerms(text)
+    const result = await saveTerms(platformId, text)
     setSaving(false)
     setMessage(result.success ? 'Saved.' : result.error)
   }

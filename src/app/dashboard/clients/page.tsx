@@ -1,7 +1,20 @@
-import { getClients } from '@/features/clients/actions'
-import { ClientList } from '@/features/clients/ClientList'
+import { redirect } from 'next/navigation'
+import { auth } from '@/lib/auth'
+import { prisma } from '@/lib/db/prisma'
 
-export default async function ClientsPage() {
-  const clients = await getClients()
-  return <ClientList clients={clients} />
+export default async function ClientsRedirect() {
+  const session = await auth()
+  if (!session?.user) redirect('/login')
+
+  if (session.user.role === 'CARETAKER' && session.user.platformId) {
+    const platform = await prisma.platform.findUnique({
+      where: { id: session.user.platformId },
+      select: { slug: true },
+    })
+    if (platform) redirect('/dashboard/' + platform.slug + '/clients')
+  }
+
+  const first = await prisma.platform.findFirst({ orderBy: { createdAt: 'asc' }, select: { slug: true } })
+  if (first) redirect('/dashboard/' + first.slug + '/clients')
+  redirect('/login')
 }

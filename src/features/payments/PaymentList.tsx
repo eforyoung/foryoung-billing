@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Card, Button, Badge, Modal, Input } from '@/lib/ui'
 import { fmtXaf, monthName } from '@/lib/utils'
 import { getUnpaidBills, recordPayment } from './actions'
@@ -20,8 +20,8 @@ interface UnpaidBill {
   reading: { consumption: number; consumptionCost: number } | null
 }
 
-export function PaymentList() {
-  const [bills, setBills] = useState<UnpaidBill[]>([])
+export function PaymentList({ unpaidBills, platformId }: { unpaidBills: UnpaidBill[]; platformId: string }) {
+  const [bills, setBills] = useState<UnpaidBill[]>(unpaidBills)
   const [payingBill, setPayingBill] = useState<UnpaidBill | null>(null)
   const [amount, setAmount] = useState(0)
   const [paymentDate, setPaymentDate] = useState('')
@@ -30,7 +30,7 @@ export function PaymentList() {
   const [modalError, setModalError] = useState('')
 
   async function refresh() {
-    const data = await getUnpaidBills()
+    const data = await getUnpaidBills(platformId)
     setBills(
       data.map(b => ({
         id: b.id,
@@ -47,10 +47,6 @@ export function PaymentList() {
       })),
     )
   }
-
-  useEffect(() => {
-    refresh()
-  }, [])
 
   function openPayModal(bill: UnpaidBill) {
     setModalError('')

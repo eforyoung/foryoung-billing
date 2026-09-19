@@ -7,7 +7,7 @@ import { generateRentBill, getClientRentRate } from './actions'
 import { computeRentTotal } from '@/features/billing/calculations'
 import { fmtXaf } from '@/lib/utils'
 
-export function RentBillForm() {
+export function RentBillForm({ platformId }: { platformId: string }) {
   const [clients, setClients] = useState<{ id: string; name: string; unit: string | null }[]>([])
   const [clientsLoading, setClientsLoading] = useState(true)
   const [clientId, setClientId] = useState('')
@@ -23,11 +23,11 @@ export function RentBillForm() {
   const [message, setMessage] = useState('')
 
   useEffect(() => {
-    getClientsForDropdown('RENT').then(result => {
+    getClientsForDropdown(platformId, 'RENT').then(result => {
       setClients(result)
       setClientsLoading(false)
     }).catch(() => setClientsLoading(false))
-  }, [])
+  }, [platformId])
 
   useEffect(() => {
     if (!clientId) {
@@ -39,7 +39,7 @@ export function RentBillForm() {
 
   async function handleGenerate() {
     setMessage('')
-    const result = await generateRentBill({ clientId, month, year, amount, monthsCount, dueDate })
+    const result = await generateRentBill({ clientId, platformId, month, year, amount, monthsCount, dueDate })
     setMessage(result.success ? 'Bill generated.' : result.error)
   }
 

@@ -26,7 +26,7 @@ interface PaymentRow {
   }
 }
 
-export function PaymentHistory() {
+export function PaymentHistory({ platformId }: { platformId: string }) {
   const [month, setMonth] = useState('')
   const [year, setYear] = useState('')
   const [serviceType, setServiceType] = useState('')
@@ -36,6 +36,7 @@ export function PaymentHistory() {
   async function refresh() {
     setLoading(true)
     const data = await getPayments({
+      platformId,
       month: month ? Number(month) : undefined,
       year: year ? Number(year) : undefined,
       serviceType: serviceType ? (serviceType as ServiceType) : undefined,

@@ -7,11 +7,12 @@ import type { ServiceType } from '@prisma/client'
 import type { ActionResult } from '@/lib/types'
 import type { ClientFormInput, ClientWithServices } from './types'
 
-export async function getClients(): Promise<ClientWithServices[]> {
+export async function getClients(platformId: string): Promise<ClientWithServices[]> {
   const session = await auth()
   if (!session?.user) return []
 
   const clients = await prisma.client.findMany({
+    where: { platformId },
     include: { services: true },
     orderBy: { name: 'asc' },
   })
@@ -21,12 +22,13 @@ export async function getClients(): Promise<ClientWithServices[]> {
   }))
 }
 
-export async function getClientsForDropdown(serviceType?: ServiceType) {
+export async function getClientsForDropdown(platformId: string, serviceType?: ServiceType) {
   const session = await auth()
   if (!session?.user) return []
 
   const clients = await prisma.client.findMany({
     where: {
+      platformId,
       isActive: true,
       ...(serviceType ? { services: { some: { type: serviceType } } } : {}),
     },
@@ -36,7 +38,7 @@ export async function getClientsForDropdown(serviceType?: ServiceType) {
   return clients
 }
 
-export async function saveClient(input: ClientFormInput): Promise<ActionResult<{ id: string }>> {
+export async function saveClient(input: ClientFormInput, platformId: string): Promise<ActionResult<{ id: string }>> {
   const session = await auth()
   if (!session?.user) return { success: false, error: 'Not authenticated' }
   if (!input.name.trim() || !input.phone.trim()) return { success: false, error: 'Name and phone are required.' }
@@ -53,8 +55,8 @@ export async function saveClient(input: ClientFormInput): Promise<ActionResult<{
   try {
     const client = await prisma.$transaction(async (tx) => {
       const client = input.id
-        ? await tx.client.update({ where: { id: input.id }, data })
-        : await tx.client.create({ data })
+        ? await tx.client.update({ where: { id: input.id, platformId }, data })
+        : await tx.client.create({ data: { ...data, platformId } })
 
       await tx.clientService.deleteMany({ where: { clientId: client.id } })
       if (input.services.length > 0) {
@@ -66,7 +68,7 @@ export async function saveClient(input: ClientFormInput): Promise<ActionResult<{
       return client
     })
 
-    revalidatePath('/dashboard/clients')
+    revalidatePath('/dashboard', 'layout')
     return { success: true, data: { id: client.id } }
   } catch (error) {
     console.error('saveClient failed:', error)
@@ -74,14 +76,14 @@ export async function saveClient(input: ClientFormInput): Promise<ActionResult<{
   }
 }
 
-export async function toggleClientActive(id: string): Promise<ActionResult> {
+export async function toggleClientActive(id: string, platformId: string): Promise<ActionResult> {
   const session = await auth()
   if (!session?.user) return { success: false, error: 'Not authenticated' }
 
-  const client = await prisma.client.findUnique({ where: { id } })
+  const client = await prisma.client.findUnique({ where: { id, platformId } })
   if (!client) return { success: false, error: 'Client not found' }
 
   await prisma.client.update({ where: { id }, data: { isActive: !client.isActive } })
-  revalidatePath('/dashboard/clients')
+  revalidatePath('/dashboard', 'layout')
   return { success: true, data: undefined }
 }

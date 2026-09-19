@@ -13,7 +13,7 @@ import {
   type ClientArrearsRow,
 } from './actions'
 
-export function ReportsView() {
+export function ReportsView({ platformId }: { platformId: string }) {
   const [month, setMonth] = useState(new Date().getMonth() + 1)
   const [year, setYear] = useState(new Date().getFullYear())
   const [report, setReport] = useState<ReportData | null>(null)
@@ -27,7 +27,7 @@ export function ReportsView() {
   const [arrearsLoading, setArrearsLoading] = useState(false)
 
   async function refresh() {
-    const result = await getReport(month, year)
+    const result = await getReport(platformId, month, year)
     if ('error' in result) return
     setReport(result)
     setInternetCost(result.internetProviderCost)
@@ -41,7 +41,7 @@ export function ReportsView() {
 
   async function refreshArrears() {
     setArrearsLoading(true)
-    const result = await getArrears()
+    const result = await getArrears(platformId)
     setArrears('error' in result ? [] : result)
     setArrearsLoading(false)
   }
@@ -52,14 +52,14 @@ export function ReportsView() {
   }
 
   async function handleSaveCosts() {
-    await saveProviderCost({ serviceType: 'INTERNET', month, year, amount: internetCost })
-    await saveProviderCost({ serviceType: 'WATER', month, year, amount: waterCost })
+    await saveProviderCost({ platformId, serviceType: 'INTERNET', month, year, amount: internetCost })
+    await saveProviderCost({ platformId, serviceType: 'WATER', month, year, amount: waterCost })
     refresh()
   }
 
   async function handleAddVariableCost() {
     if (!newLabel.trim()) return
-    await saveVariableCost({ label: newLabel, month, year, amount: newAmount, notes: newNotes || undefined })
+    await saveVariableCost({ platformId, label: newLabel, month, year, amount: newAmount, notes: newNotes || undefined })
     setNewAmount(0)
     setNewNotes('')
     refresh()

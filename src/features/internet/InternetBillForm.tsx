@@ -8,7 +8,7 @@ import { computeInternetTotal } from '@/features/billing/calculations'
 import { fmtXaf, monthName } from '@/lib/utils'
 import type { ArrearsSummary } from '@/features/billing/calculations'
 
-export function InternetBillForm() {
+export function InternetBillForm({ platformId }: { platformId: string }) {
   const [clients, setClients] = useState<{ id: string; name: string; unit: string | null }[]>([])
   const [clientsLoading, setClientsLoading] = useState(true)
   const [clientId, setClientId] = useState('')
@@ -25,11 +25,11 @@ export function InternetBillForm() {
   const [message, setMessage] = useState('')
 
   useEffect(() => {
-    getClientsForDropdown('INTERNET').then(result => {
+    getClientsForDropdown(platformId, 'INTERNET').then(result => {
       setClients(result)
       setClientsLoading(false)
     }).catch(() => setClientsLoading(false))
-  }, [])
+  }, [platformId])
 
   useEffect(() => {
     if (!clientId) {
@@ -44,7 +44,7 @@ export function InternetBillForm() {
 
   async function handleGenerate() {
     setMessage('')
-    const result = await generateInternetBill({ clientId, month, year, monthsCount, consolidate, dueDate })
+    const result = await generateInternetBill({ clientId, platformId, month, year, monthsCount, consolidate, dueDate })
     setMessage(result.success ? 'Bill generated.' : result.error)
   }
 

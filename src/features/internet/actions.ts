@@ -6,12 +6,12 @@ import { revalidatePath } from 'next/cache'
 import { computeInternetTotal, findArrears, type ArrearsSummary } from '@/features/billing/calculations'
 import type { ActionResult } from '@/lib/types'
 
-export async function getInternetBills() {
+export async function getInternetBills(platformId: string) {
   const session = await auth()
   if (!session?.user) return []
 
   const bills = await prisma.bill.findMany({
-    where: { serviceType: 'INTERNET' },
+    where: { serviceType: 'INTERNET', client: { platformId } },
     include: { client: { select: { name: true } } },
     orderBy: [{ year: 'desc' }, { month: 'desc' }],
   })
@@ -26,9 +26,6 @@ export async function checkInternetArrears(clientId: string, month: number, year
   const session = await auth()
   if (!session?.user) return { bills: [], totalMonths: 0, totalAmount: 0 }
 
-  // Only fully-untouched unpaid bills are eligible for consolidation — a bill with a
-  // partial payment already recorded must stay standalone (its own history stays
-  // intact, and deleting it here would violate the Payment foreign key).
   const unpaid = await prisma.bill.findMany({
     where: { clientId, serviceType: 'INTERNET', isPaid: false, amountPaid: 0 },
   })
@@ -41,6 +38,7 @@ export async function checkInternetArrears(clientId: string, month: number, year
 
 interface GenerateInternetBillInput {
   clientId: string
+  platformId: string
   month: number
   year: number
   monthsCount: number
@@ -52,7 +50,7 @@ export async function generateInternetBill(input: GenerateInternetBillInput): Pr
   const session = await auth()
   if (!session?.user) return { success: false, error: 'Not authenticated' }
 
-  const client = await prisma.client.findUnique({ where: { id: input.clientId } })
+  const client = await prisma.client.findUnique({ where: { id: input.clientId, platformId: input.platformId } })
   if (!client || !client.isActive) return { success: false, error: 'Client is not active.' }
 
   const existing = await prisma.bill.findFirst({
@@ -99,8 +97,7 @@ export async function generateInternetBill(input: GenerateInternetBillInput): Pr
       return created
     })
 
-    revalidatePath('/dashboard/internet-bills')
-    revalidatePath('/dashboard/payments')
+    revalidatePath('/dashboard', 'layout')
     return { success: true, data: { id: bill.id } }
   } catch (error) {
     console.error('generateInternetBill failed:', error)
@@ -141,6 +138,6 @@ export async function updateInternetBill(
     return { success: false, error: 'Failed to update bill.' }
   }
 
-  revalidatePath('/dashboard/internet-bills')
+  revalidatePath('/dashboard', 'layout')
   return { success: true, data: undefined }
 }

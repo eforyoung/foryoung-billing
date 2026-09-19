@@ -6,12 +6,12 @@ import { revalidatePath } from 'next/cache'
 import { computeWaterBill, type WaterBillBreakdown } from '@/features/billing/calculations'
 import type { ActionResult } from '@/lib/types'
 
-export async function getWaterBills() {
+export async function getWaterBills(platformId: string) {
   const session = await auth()
   if (!session?.user) return []
 
   const bills = await prisma.bill.findMany({
-    where: { serviceType: 'WATER' },
+    where: { serviceType: 'WATER', client: { platformId } },
     include: { client: { select: { name: true } }, reading: true },
     orderBy: [{ year: 'desc' }, { month: 'desc' }],
   })
@@ -45,15 +45,16 @@ export async function getPreviousReading(clientId: string): Promise<number | nul
   return last ? Number(last.currentReading) : null
 }
 
-async function countActiveWaterTenants(): Promise<number> {
+async function countActiveWaterTenants(platformId: string): Promise<number> {
   return prisma.client.count({
-    where: { isActive: true, services: { some: { type: 'WATER' } } },
+    where: { platformId, isActive: true, services: { some: { type: 'WATER' } } },
   })
 }
 
 export async function previewWaterBill(
   currentReading: number,
   previousReading: number,
+  platformId: string,
 ): Promise<ActionResult<WaterBillBreakdown>> {
   const session = await auth()
   if (!session?.user) return { success: false, error: 'Not authenticated' }
@@ -61,12 +62,13 @@ export async function previewWaterBill(
   if (currentReading < previousReading) {
     return { success: false, error: 'Current reading cannot be less than the previous reading.' }
   }
-  const tenants = await countActiveWaterTenants()
+  const tenants = await countActiveWaterTenants(platformId)
   return { success: true, data: computeWaterBill(currentReading, previousReading, tenants) }
 }
 
 interface GenerateWaterBillInput {
   clientId: string
+  platformId: string
   month: number
   year: number
   currentReading: number
@@ -81,7 +83,7 @@ export async function generateWaterBill(input: GenerateWaterBillInput): Promise<
     return { success: false, error: 'Current reading cannot be less than the previous reading.' }
   }
 
-  const client = await prisma.client.findUnique({ where: { id: input.clientId } })
+  const client = await prisma.client.findUnique({ where: { id: input.clientId, platformId: input.platformId } })
   if (!client || !client.isActive) return { success: false, error: 'Client is not active.' }
 
   const existing = await prisma.bill.findFirst({
@@ -89,7 +91,7 @@ export async function generateWaterBill(input: GenerateWaterBillInput): Promise<
   })
   if (existing) return { success: false, error: 'A bill already exists for this client and period.' }
 
-  const tenants = await countActiveWaterTenants()
+  const tenants = await countActiveWaterTenants(input.platformId)
   const breakdown = computeWaterBill(input.currentReading, input.previousReading, tenants)
 
   const bill = await prisma.bill.create({
@@ -116,12 +118,13 @@ export async function generateWaterBill(input: GenerateWaterBillInput): Promise<
     },
   })
 
-  revalidatePath('/dashboard/water-bills')
+  revalidatePath('/dashboard', 'layout')
   return { success: true, data: { id: bill.id } }
 }
 
 export async function updateWaterBill(
   billId: string,
+  platformId: string,
   input: { month: number; year: number; currentReading: number; previousReading: number },
 ): Promise<ActionResult> {
   const session = await auth()
@@ -135,7 +138,7 @@ export async function updateWaterBill(
   if (!bill) return { success: false, error: 'Bill not found' }
   if (Number(bill.amountPaid) > 0) return { success: false, error: 'Cannot edit a bill that has a payment recorded.' }
 
-  const tenants = await countActiveWaterTenants()
+  const tenants = await countActiveWaterTenants(platformId)
   const breakdown = computeWaterBill(input.currentReading, input.previousReading, tenants)
 
   try {
@@ -167,6 +170,6 @@ export async function updateWaterBill(
     return { success: false, error: 'Failed to update bill.' }
   }
 
-  revalidatePath('/dashboard/water-bills')
+  revalidatePath('/dashboard', 'layout')
   return { success: true, data: undefined }
 }

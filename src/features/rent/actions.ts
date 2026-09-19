@@ -6,12 +6,12 @@ import { revalidatePath } from 'next/cache'
 import { computeRentTotal } from '@/features/billing/calculations'
 import type { ActionResult } from '@/lib/types'
 
-export async function getRentBills() {
+export async function getRentBills(platformId: string) {
   const session = await auth()
   if (!session?.user) return []
 
   const bills = await prisma.bill.findMany({
-    where: { serviceType: 'RENT' },
+    where: { serviceType: 'RENT', client: { platformId } },
     include: { client: { select: { name: true } } },
     orderBy: [{ year: 'desc' }, { month: 'desc' }],
   })
@@ -24,6 +24,7 @@ export async function getRentBills() {
 
 interface GenerateRentBillInput {
   clientId: string
+  platformId: string
   month: number
   year: number
   amount: number
@@ -35,7 +36,7 @@ export async function generateRentBill(input: GenerateRentBillInput): Promise<Ac
   const session = await auth()
   if (!session?.user) return { success: false, error: 'Not authenticated' }
 
-  const client = await prisma.client.findUnique({ where: { id: input.clientId } })
+  const client = await prisma.client.findUnique({ where: { id: input.clientId, platformId: input.platformId } })
   if (!client || !client.isActive) return { success: false, error: 'Client is not active.' }
 
   const service = await prisma.clientService.findUnique({
@@ -62,7 +63,7 @@ export async function generateRentBill(input: GenerateRentBillInput): Promise<Ac
     },
   })
 
-  revalidatePath('/dashboard/rent-bills')
+  revalidatePath('/dashboard', 'layout')
   return { success: true, data: { id: bill.id } }
 }
 
@@ -109,6 +110,6 @@ export async function updateRentBill(
     return { success: false, error: 'Failed to update bill.' }
   }
 
-  revalidatePath('/dashboard/rent-bills')
+  revalidatePath('/dashboard', 'layout')
   return { success: true, data: undefined }
 }

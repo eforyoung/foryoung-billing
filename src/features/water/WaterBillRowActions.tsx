@@ -8,7 +8,7 @@ import { fmtXaf } from '@/lib/utils'
 import type { WaterBillBreakdown } from '@/features/billing/calculations'
 
 interface WaterBillRowActionsProps {
-  bill: { id: string; month: number; year: number; previousReading: number; currentReading: number }
+  bill: { id: string; month: number; year: number; previousReading: number; currentReading: number; platformId: string }
 }
 
 export function WaterBillRowActions({ bill }: WaterBillRowActionsProps) {
@@ -24,15 +24,15 @@ export function WaterBillRowActions({ bill }: WaterBillRowActionsProps) {
 
   useEffect(() => {
     if (!open) return
-    previewWaterBill(currentReading, previousReading).then(result => {
+    previewWaterBill(currentReading, previousReading, bill.platformId).then(result => {
       setBreakdown(result.success ? result.data : null)
     })
-  }, [open, currentReading, previousReading])
+  }, [open, currentReading, previousReading, bill.platformId])
 
   async function handleSave() {
     setSaving(true)
     setError('')
-    const result = await updateWaterBill(bill.id, { month, year, currentReading, previousReading })
+    const result = await updateWaterBill(bill.id, bill.platformId, { month, year, currentReading, previousReading })
     setSaving(false)
     if (!result.success) {
       setError(result.error)

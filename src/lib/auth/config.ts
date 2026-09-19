@@ -23,7 +23,7 @@ export const authConfig: NextAuthConfig = {
         const valid = await bcrypt.compare(password, user.passwordHash)
         if (!valid) return null
 
-        return { id: user.id, email: user.email, name: user.name, role: user.role }
+        return { id: user.id, email: user.email, name: user.name, role: user.role, platformId: user.platformId }
       },
     }),
   ],
@@ -32,6 +32,7 @@ export const authConfig: NextAuthConfig = {
       if (user) {
         token.id = user.id as string
         token.role = user.role
+        token.platformId = user.platformId ?? null
       }
       return token
     },
@@ -39,6 +40,7 @@ export const authConfig: NextAuthConfig = {
       if (session.user) {
         session.user.id = token.id
         session.user.role = token.role
+        session.user.platformId = token.platformId
       }
       return session
     },

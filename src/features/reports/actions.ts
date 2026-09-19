@@ -22,21 +22,19 @@ export interface ReportData {
   totalVariableCosts: number
 }
 
-export async function getReport(month: number, year: number): Promise<ReportData | { error: string }> {
+export async function getReport(platformId: string, month: number, year: number): Promise<ReportData | { error: string }> {
   const session = await auth()
   if (!requireAdmin(session)) return { error: 'Forbidden' }
 
   const [internetBills, waterBills, rentBills, internetCost, waterCost, variableCostRows] = await Promise.all([
-    prisma.bill.findMany({ where: { serviceType: 'INTERNET', month, year } }),
-    prisma.bill.findMany({ where: { serviceType: 'WATER', month, year } }),
-    prisma.bill.findMany({ where: { serviceType: 'RENT', month, year } }),
-    prisma.providerCost.findUnique({ where: { serviceType_month_year: { serviceType: 'INTERNET', month, year } } }),
-    prisma.providerCost.findUnique({ where: { serviceType_month_year: { serviceType: 'WATER', month, year } } }),
-    prisma.variableCost.findMany({ where: { month, year }, orderBy: { label: 'asc' } }),
+    prisma.bill.findMany({ where: { serviceType: 'INTERNET', month, year, client: { platformId } } }),
+    prisma.bill.findMany({ where: { serviceType: 'WATER', month, year, client: { platformId } } }),
+    prisma.bill.findMany({ where: { serviceType: 'RENT', month, year, client: { platformId } } }),
+    prisma.providerCost.findUnique({ where: { platformId_serviceType_month_year: { platformId, serviceType: 'INTERNET', month, year } } }),
+    prisma.providerCost.findUnique({ where: { platformId_serviceType_month_year: { platformId, serviceType: 'WATER', month, year } } }),
+    prisma.variableCost.findMany({ where: { platformId, month, year }, orderBy: { label: 'asc' } }),
   ])
 
-  // Cash actually collected, including partial payments on bills that aren't fully paid yet —
-  // not just the total of bills marked isPaid.
   const internetCollected = internetBills.reduce((s, b) => s + Number(b.amountPaid), 0)
   const waterCollected = waterBills.reduce((s, b) => s + Number(b.amountPaid), 0)
   const rentCollected = rentBills.reduce((s, b) => s + Number(b.amountPaid), 0)
@@ -65,6 +63,7 @@ export async function getReport(month: number, year: number): Promise<ReportData
 }
 
 interface ProviderCostInput {
+  platformId: string
   serviceType: 'INTERNET' | 'WATER'
   month: number
   year: number
@@ -77,16 +76,17 @@ export async function saveProviderCost(input: ProviderCostInput): Promise<Action
   if (!requireAdmin(session)) return { success: false, error: 'Forbidden' }
 
   await prisma.providerCost.upsert({
-    where: { serviceType_month_year: { serviceType: input.serviceType, month: input.month, year: input.year } },
+    where: { platformId_serviceType_month_year: { platformId: input.platformId, serviceType: input.serviceType, month: input.month, year: input.year } },
     update: { amount: input.amount, notes: input.notes },
-    create: { ...input },
+    create: { platformId: input.platformId, serviceType: input.serviceType, month: input.month, year: input.year, amount: input.amount, notes: input.notes },
   })
 
-  revalidatePath('/dashboard/reports')
+  revalidatePath('/dashboard', 'layout')
   return { success: true, data: undefined }
 }
 
 interface VariableCostInput {
+  platformId: string
   label: string
   month: number
   year: number
@@ -102,12 +102,12 @@ export async function saveVariableCost(input: VariableCostInput): Promise<Action
   const label = input.label.trim()
 
   await prisma.variableCost.upsert({
-    where: { label_month_year: { label, month: input.month, year: input.year } },
+    where: { platformId_label_month_year: { platformId: input.platformId, label, month: input.month, year: input.year } },
     update: { amount: input.amount, notes: input.notes },
-    create: { ...input, label },
+    create: { platformId: input.platformId, label, month: input.month, year: input.year, amount: input.amount, notes: input.notes },
   })
 
-  revalidatePath('/dashboard/reports')
+  revalidatePath('/dashboard', 'layout')
   return { success: true, data: undefined }
 }
 
@@ -117,7 +117,7 @@ export async function deleteVariableCost(id: string): Promise<ActionResult> {
 
   await prisma.variableCost.delete({ where: { id } })
 
-  revalidatePath('/dashboard/reports')
+  revalidatePath('/dashboard', 'layout')
   return { success: true, data: undefined }
 }
 
@@ -134,12 +134,12 @@ export interface ClientArrearsRow {
   oldestUnpaidLabel: string | null
 }
 
-export async function getArrears(): Promise<ClientArrearsRow[] | { error: string }> {
+export async function getArrears(platformId: string): Promise<ClientArrearsRow[] | { error: string }> {
   const session = await auth()
   if (!requireAdmin(session)) return { error: 'Forbidden' }
 
   const bills = await prisma.bill.findMany({
-    where: { isPaid: false },
+    where: { isPaid: false, client: { platformId } },
     include: { client: { select: { name: true, unit: true, phone: true } } },
     orderBy: [{ year: 'asc' }, { month: 'asc' }],
   })

@@ -10,9 +10,10 @@ interface ClientFormProps {
   open: boolean
   onClose: () => void
   editing: ClientWithServices | null
+  platformId: string
 }
 
-export function ClientForm({ open, onClose, editing }: ClientFormProps) {
+export function ClientForm({ open, onClose, editing, platformId }: ClientFormProps) {
   const [name, setName] = useState(editing?.name ?? '')
   const [phone, setPhone] = useState(editing?.phone ?? '')
   const [email, setEmail] = useState(editing?.email ?? '')
@@ -45,7 +46,7 @@ export function ClientForm({ open, onClose, editing }: ClientFormProps) {
       notes,
       isActive,
       services,
-    })
+    }, platformId)
 
     setSaving(false)
     if (!result.success) {

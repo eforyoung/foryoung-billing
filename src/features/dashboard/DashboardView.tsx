@@ -2,8 +2,8 @@ import { Card, Badge } from '@/lib/ui'
 import { fmtXaf, monthName } from '@/lib/utils'
 import { getDashboardSummary } from './actions'
 
-export async function DashboardView() {
-  const summary = await getDashboardSummary()
+export async function DashboardView({ platformId }: { platformId: string }) {
+  const summary = await getDashboardSummary(platformId)
 
   const cards = [
     { label: 'Total Clients', value: summary.totalClients },

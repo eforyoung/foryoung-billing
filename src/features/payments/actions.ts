@@ -7,6 +7,7 @@ import type { ServiceType } from '@prisma/client'
 import type { ActionResult } from '@/lib/types'
 
 interface PaymentFilters {
+  platformId: string
   month?: number
   year?: number
   serviceType?: ServiceType
@@ -19,6 +20,7 @@ export async function getPayments(filters: PaymentFilters) {
   const payments = await prisma.payment.findMany({
     where: {
       bill: {
+        client: { platformId: filters.platformId },
         ...(filters.month ? { month: filters.month } : {}),
         ...(filters.year ? { year: filters.year } : {}),
         ...(filters.serviceType ? { serviceType: filters.serviceType } : {}),
@@ -38,9 +40,6 @@ export async function getPayments(filters: PaymentFilters) {
 
   return payments.map(p => {
     const billAmount = Number(p.bill.amount)
-    // Balance as of THIS payment's date, not the bill's current running total —
-    // reprinting an earlier payment's receipt after later payments must still
-    // reflect what was owed at that point in time, not today's balance.
     const paidAsOfThisPayment = p.bill.payments
       .filter(sib => sib.paymentDate.getTime() <= p.paymentDate.getTime())
       .reduce((s, sib) => s + Number(sib.amountPaid), 0)
@@ -70,12 +69,12 @@ export async function getPayments(filters: PaymentFilters) {
   })
 }
 
-export async function getUnpaidBills() {
+export async function getUnpaidBills(platformId: string) {
   const session = await auth()
   if (!session?.user) return []
 
   const bills = await prisma.bill.findMany({
-    where: { isPaid: false },
+    where: { isPaid: false, client: { platformId } },
     include: { client: { select: { name: true, phone: true, unit: true } }, reading: true },
     orderBy: [{ year: 'asc' }, { month: 'asc' }],
   })
@@ -127,8 +126,6 @@ export async function recordPayment(
           recordedBy: session.user.id,
         },
       })
-      // Atomic increment — avoids a lost update if two payments on the same
-      // bill are recorded concurrently (each read a stale amountPaid).
       const updated = await tx.bill.update({
         where: { id: billId },
         data: { amountPaid: { increment: amount } },
@@ -142,10 +139,6 @@ export async function recordPayment(
     return { success: false, error: 'Failed to record payment.' }
   }
 
-  revalidatePath('/dashboard/payments')
-  revalidatePath('/dashboard/internet-bills')
-  revalidatePath('/dashboard/water-bills')
-  revalidatePath('/dashboard/rent-bills')
-  revalidatePath('/dashboard/reports')
+  revalidatePath('/dashboard', 'layout')
   return { success: true, data: undefined }
 }

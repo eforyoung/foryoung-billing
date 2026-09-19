@@ -18,28 +18,45 @@ enum ServiceType {
   RENT
 }
 
+model Platform {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+
+  users         User[]
+  clients       Client[]
+  providerCosts ProviderCost[]
+  variableCosts VariableCost[]
+  settings      BillingSettings?
+}
+
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
+  id           String    @id @default(uuid())
+  email        String    @unique
   passwordHash String
   name         String
   role         Role
-  active       Boolean  @default(true)
-  createdAt    DateTime @default(now())
+  active       Boolean   @default(true)
+  platformId   String?
+  platform     Platform? @relation(fields: [platformId], references: [id])
+  createdAt    DateTime  @default(now())
 }
 
 model Client {
-  id        String          @id @default(uuid())
-  name      String
-  phone     String
-  email     String?
-  unit      String?
-  isActive  Boolean         @default(true)
-  notes     String?
-  createdAt DateTime        @default(now())
-  services  ClientService[]
-  bills     Bill[]
-  readings  WaterReading[]
+  id         String          @id @default(uuid())
+  platformId String?
+  platform   Platform?       @relation(fields: [platformId], references: [id])
+  name       String
+  phone      String
+  email      String?
+  unit       String?
+  isActive   Boolean         @default(true)
+  notes      String?
+  createdAt  DateTime        @default(now())
+  services   ClientService[]
+  bills      Bill[]
+  readings   WaterReading[]
 }
 
 model ClientService {
@@ -92,24 +109,28 @@ model WaterReading {
 
 model ProviderCost {
   id          String      @id @default(uuid())
+  platformId  String?
+  platform    Platform?   @relation(fields: [platformId], references: [id])
   serviceType ServiceType
   month       Int
   year        Int
   amount      Decimal
   notes       String?
 
-  @@unique([serviceType, month, year])
+  @@unique([platformId, serviceType, month, year])
 }
 
 model VariableCost {
-  id     String   @id @default(uuid())
-  label  String
-  month  Int
-  year   Int
-  amount Decimal
-  notes  String?
+  id         String    @id @default(uuid())
+  platformId String?
+  platform   Platform? @relation(fields: [platformId], references: [id])
+  label      String
+  month      Int
+  year       Int
+  amount     Decimal
+  notes      String?
 
-  @@unique([label, month, year])
+  @@unique([platformId, label, month, year])
 }
 
 model Payment {
@@ -125,7 +146,9 @@ model Payment {
 }
 
 model BillingSettings {
-  id        Int      @id @default(1)
-  termsText String   @default("")
-  updatedAt DateTime @updatedAt
+  id         Int       @id @default(autoincrement())
+  platformId String?   @unique
+  platform   Platform? @relation(fields: [platformId], references: [id])
+  termsText  String    @default("")
+  updatedAt  DateTime  @updatedAt
 }

@@ -1,12 +1,20 @@
 import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
-import { requireAdmin } from '@/lib/auth/permissions'
-import { getTerms } from '@/features/terms/actions'
-import { TermsEditor } from '@/features/terms/TermsEditor'
+import { prisma } from '@/lib/db/prisma'
 
-export default async function TermsPage() {
+export default async function TermsRedirect() {
   const session = await auth()
-  if (!requireAdmin(session)) redirect('/dashboard')
-  const terms = await getTerms()
-  return <TermsEditor initialText={terms} />
+  if (!session?.user) redirect('/login')
+
+  if (session.user.role === 'CARETAKER' && session.user.platformId) {
+    const platform = await prisma.platform.findUnique({
+      where: { id: session.user.platformId },
+      select: { slug: true },
+    })
+    if (platform) redirect('/dashboard/' + platform.slug + '/terms')
+  }
+
+  const first = await prisma.platform.findFirst({ orderBy: { createdAt: 'asc' }, select: { slug: true } })
+  if (first) redirect('/dashboard/' + first.slug + '/terms')
+  redirect('/login')
 }

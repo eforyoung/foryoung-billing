@@ -12,7 +12,7 @@ export interface DashboardSummary {
   recentUnpaid: { id: string; clientName: string; serviceType: string; balanceDue: number; month: number; year: number }[]
 }
 
-export async function getDashboardSummary(): Promise<DashboardSummary> {
+export async function getDashboardSummary(platformId: string): Promise<DashboardSummary> {
   const session = await auth()
   if (!session?.user) {
     return { totalClients: 0, activeClients: 0, unpaidBillsCount: 0, revenueThisMonth: 0, totalArrears: 0, recentUnpaid: [] }
@@ -23,12 +23,12 @@ export async function getDashboardSummary(): Promise<DashboardSummary> {
   const year = now.getFullYear()
 
   const [totalClients, activeClients, unpaidBills, billsThisPeriod, recentUnpaidBills] = await Promise.all([
-    prisma.client.count(),
-    prisma.client.count({ where: { isActive: true } }),
-    prisma.bill.findMany({ where: { isPaid: false }, select: { amount: true, amountPaid: true } }),
-    prisma.bill.findMany({ where: { month, year }, select: { amountPaid: true } }),
+    prisma.client.count({ where: { platformId } }),
+    prisma.client.count({ where: { platformId, isActive: true } }),
+    prisma.bill.findMany({ where: { isPaid: false, client: { platformId } }, select: { amount: true, amountPaid: true } }),
+    prisma.bill.findMany({ where: { month, year, client: { platformId } }, select: { amountPaid: true } }),
     prisma.bill.findMany({
-      where: { isPaid: false },
+      where: { isPaid: false, client: { platformId } },
       include: { client: { select: { name: true } } },
       orderBy: [{ year: 'asc' }, { month: 'asc' }],
       take: 10,

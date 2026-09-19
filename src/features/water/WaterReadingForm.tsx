@@ -7,7 +7,7 @@ import { getPreviousReading, previewWaterBill, generateWaterBill } from './actio
 import { fmtXaf } from '@/lib/utils'
 import type { WaterBillBreakdown } from '@/features/billing/calculations'
 
-export function WaterReadingForm() {
+export function WaterReadingForm({ platformId }: { platformId: string }) {
   const [clients, setClients] = useState<{ id: string; name: string; unit: string | null }[]>([])
   const [clientsLoading, setClientsLoading] = useState(true)
   const [clientId, setClientId] = useState('')
@@ -20,11 +20,11 @@ export function WaterReadingForm() {
   const [message, setMessage] = useState('')
 
   useEffect(() => {
-    getClientsForDropdown('WATER').then(result => {
+    getClientsForDropdown(platformId, 'WATER').then(result => {
       setClients(result)
       setClientsLoading(false)
     }).catch(() => setClientsLoading(false))
-  }, [])
+  }, [platformId])
 
   useEffect(() => {
     if (!clientId) {
@@ -41,15 +41,16 @@ export function WaterReadingForm() {
       setBreakdown(null)
       return
     }
-    previewWaterBill(currentReading, effectivePrevious).then(result => {
+    previewWaterBill(currentReading, effectivePrevious, platformId).then(result => {
       setBreakdown(result.success ? result.data : null)
     })
-  }, [clientId, currentReading, effectivePrevious])
+  }, [clientId, currentReading, effectivePrevious, platformId])
 
   async function handleGenerate() {
     setMessage('')
     const result = await generateWaterBill({
       clientId,
+      platformId,
       month,
       year,
       currentReading,

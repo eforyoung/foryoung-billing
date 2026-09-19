@@ -1,11 +1,20 @@
-import { RentBillForm } from '@/features/rent/RentBillForm'
-import { RentBillList } from '@/features/rent/RentBillList'
+import { redirect } from 'next/navigation'
+import { auth } from '@/lib/auth'
+import { prisma } from '@/lib/db/prisma'
 
-export default function RentBillsPage() {
-  return (
-    <div className="space-y-6">
-      <RentBillForm />
-      <RentBillList />
-    </div>
-  )
+export default async function RentBillsRedirect() {
+  const session = await auth()
+  if (!session?.user) redirect('/login')
+
+  if (session.user.role === 'CARETAKER' && session.user.platformId) {
+    const platform = await prisma.platform.findUnique({
+      where: { id: session.user.platformId },
+      select: { slug: true },
+    })
+    if (platform) redirect('/dashboard/' + platform.slug + '/rent-bills')
+  }
+
+  const first = await prisma.platform.findFirst({ orderBy: { createdAt: 'asc' }, select: { slug: true } })
+  if (first) redirect('/dashboard/' + first.slug + '/rent-bills')
+  redirect('/login')
 }

@@ -84,6 +84,12 @@ async function main() {
     return
   }
 
+  const platform = await prisma.platform.upsert({
+    where: { slug: 'foryoungs' },
+    update: {},
+    create: { name: "The Foryoung's", slug: 'foryoungs' },
+  })
+
   const raw = readFileSync(LEGACY_JSON_PATH, 'utf-8')
   const parsed: LegacyData = JSON.parse(raw)
   const legacy = parsed.data
@@ -93,6 +99,7 @@ async function main() {
   for (const c of legacy.clients ?? []) {
     const client = await prisma.client.create({
       data: {
+        platformId: platform.id,
         name: c.name,
         phone: c.phone,
         email: c.email,
@@ -174,7 +181,7 @@ async function main() {
   let costCount = 0
   for (const pc of legacy.providerCosts ?? []) {
     await prisma.providerCost.create({
-      data: { serviceType: SERVICE_MAP[pc.serviceType], month: pc.month, year: pc.year, amount: pc.amount, notes: pc.notes },
+      data: { platformId: platform.id, serviceType: SERVICE_MAP[pc.serviceType], month: pc.month, year: pc.year, amount: pc.amount, notes: pc.notes },
     })
     costCount++
   }
@@ -182,9 +189,9 @@ async function main() {
 
   if (legacy.terms) {
     await prisma.billingSettings.upsert({
-      where: { id: 1 },
+      where: { platformId: platform.id },
       update: { termsText: legacy.terms },
-      create: { id: 1, termsText: legacy.terms },
+      create: { platformId: platform.id, termsText: legacy.terms },
     })
     console.log('Migrated terms text.')
   }

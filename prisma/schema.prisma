@@ -45,8 +45,8 @@ model User {
 
 model Client {
   id         String          @id @default(uuid())
-  platformId String?
-  platform   Platform?       @relation(fields: [platformId], references: [id])
+  platformId String
+  platform   Platform        @relation(fields: [platformId], references: [id])
   name       String
   phone      String
   email      String?
@@ -109,8 +109,8 @@ model WaterReading {
 
 model ProviderCost {
   id          String      @id @default(uuid())
-  platformId  String?
-  platform    Platform?   @relation(fields: [platformId], references: [id])
+  platformId  String
+  platform    Platform    @relation(fields: [platformId], references: [id])
   serviceType ServiceType
   month       Int
   year        Int
@@ -122,8 +122,8 @@ model ProviderCost {
 
 model VariableCost {
   id         String    @id @default(uuid())
-  platformId String?
-  platform   Platform? @relation(fields: [platformId], references: [id])
+  platformId String
+  platform   Platform  @relation(fields: [platformId], references: [id])
   label      String
   month      Int
   year       Int
@@ -146,9 +146,9 @@ model Payment {
 }
 
 model BillingSettings {
-  id         Int       @id @default(autoincrement())
-  platformId String?   @unique
-  platform   Platform? @relation(fields: [platformId], references: [id])
+  id         Int      @id @default(autoincrement())
+  platformId String   @unique
+  platform   Platform @relation(fields: [platformId], references: [id])
   termsText  String    @default("")
   updatedAt  DateTime  @updatedAt
 }

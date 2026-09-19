@@ -20,35 +20,22 @@ async function main() {
   })
   console.log(`Platform: ${platform.name} (${platform.id})`)
 
-  // 2. Assign all existing clients
-  const { count: clientCount } = await prisma.client.updateMany({
-    where: { platformId: null },
-    data: { platformId: platform.id },
-  })
-  console.log(`Assigned ${clientCount} clients`)
+  // 2-5. After Phase 2 the platformId column is required (non-nullable).
+  // All rows were already backfilled when Phase 1 ran this script.
+  // These counts are informational only.
+  const clientCount = await prisma.client.count({ where: { platformId: platform.id } })
+  console.log(`Clients on platform: ${clientCount}`)
 
-  // 3. Assign all existing provider costs
-  const { count: providerCount } = await prisma.providerCost.updateMany({
-    where: { platformId: null },
-    data: { platformId: platform.id },
-  })
-  console.log(`Assigned ${providerCount} provider costs`)
+  const providerCount = await prisma.providerCost.count({ where: { platformId: platform.id } })
+  console.log(`Provider costs on platform: ${providerCount}`)
 
-  // 4. Assign all existing variable costs
-  const { count: varCount } = await prisma.variableCost.updateMany({
-    where: { platformId: null },
-    data: { platformId: platform.id },
-  })
-  console.log(`Assigned ${varCount} variable costs`)
+  const varCount = await prisma.variableCost.count({ where: { platformId: platform.id } })
+  console.log(`Variable costs on platform: ${varCount}`)
 
-  // 5. Assign billing settings (the singleton row id=1 if it exists)
-  const { count: settingsCount } = await prisma.billingSettings.updateMany({
-    where: { platformId: null },
-    data: { platformId: platform.id },
-  })
-  console.log(`Assigned ${settingsCount} billing settings rows`)
+  const settingsCount = await prisma.billingSettings.count({ where: { platformId: platform.id } })
+  console.log(`Billing settings rows on platform: ${settingsCount}`)
 
-  console.log('\nBackfill complete. Now update schema.prisma to make platformId required, then run: npx prisma db push')
+  console.log('\nDone. Phase 2 schema already applied — platformId is required on all data models.')
 }
 
 main()

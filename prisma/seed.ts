@@ -29,10 +29,16 @@ async function main() {
     },
   })
 
-  await prisma.billingSettings.upsert({
-    where: { id: 1 },
+  const platform = await prisma.platform.upsert({
+    where: { slug: 'foryoungs' },
     update: {},
-    create: { id: 1, termsText: 'Payment is due within 30 days of invoice date.' },
+    create: { name: "The Foryoung's", slug: 'foryoungs' },
+  })
+
+  await prisma.billingSettings.upsert({
+    where: { platformId: platform.id },
+    update: {},
+    create: { termsText: 'Payment is due within 30 days of invoice date.', platformId: platform.id },
   })
 
   console.log('Seeded users:')
